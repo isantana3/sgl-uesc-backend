@@ -1,6 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty, IsString } from 'class-validator';
-import { ObjectId } from 'mongoose';
 
 export class CreateRoomDto {
   @IsString({ message: 'label deve ser do tipo string' })
@@ -14,5 +13,5 @@ export class CreateRoomDto {
   @IsString({ message: 'locationId deve ser do tipo string' })
   @IsNotEmpty({ message: 'locationId é obrigatório' })
   @ApiProperty({ example: '643d998881fdb61d5d0b1868' })
-  locationId: ObjectId;
+  locationId: string;
 }

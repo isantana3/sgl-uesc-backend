@@ -10,8 +10,8 @@ import { LocationsModule } from './locations/locations.module';
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
     MongooseModule.forRoot(process.env.DB_URL),
-    RoomsModule,
     LocationsModule,
+    RoomsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

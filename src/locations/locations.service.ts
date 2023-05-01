@@ -1,26 +1,50 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { CreateLocationDto } from './dto/create-location.dto';
 import { UpdateLocationDto } from './dto/update-location.dto';
+import { InjectModel } from '@nestjs/mongoose';
+import { Location } from './entities/location.schemas';
+import { Model } from 'mongoose';
 
 @Injectable()
 export class LocationsService {
-  create(createLocationDto: CreateLocationDto) {
-    return 'This action adds a new location';
+  constructor(
+    @InjectModel(Location.name) private locationModel: Model<Location>,
+  ) {}
+  async create(createLocationDto: CreateLocationDto): Promise<Location> {
+    return this.locationModel.create(createLocationDto);
   }
 
-  findAll() {
-    return `This action returns all locations`;
+  async findAll(): Promise<Location[]> {
+    return this.locationModel.find().exec();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} location`;
+  async findOne(id: string): Promise<Location> {
+    const result = await this.locationModel.findOne({ _id: id }).exec();
+    if (!result) {
+      throw new HttpException(
+        {
+          status: HttpStatus.BAD_REQUEST,
+          error: 'Location Not Found',
+        },
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+    return result;
   }
 
-  update(id: number, updateLocationDto: UpdateLocationDto) {
-    return `This action updates a #${id} location`;
+  async update(
+    id: string,
+    updateLocationDto: UpdateLocationDto,
+  ): Promise<Location> {
+    await this.locationModel.updateOne({ _id: id }, updateLocationDto).exec();
+
+    return this.findOne(id);
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} location`;
+  async remove(id: string): Promise<Location> {
+    const deletedItem = await this.locationModel
+      .findByIdAndRemove({ _id: id })
+      .exec();
+    return deletedItem;
   }
 }

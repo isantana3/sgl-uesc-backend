@@ -1,17 +1,22 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
+import { LocationsService } from 'src/locations/locations.service';
 import { CreateRoomDto } from './dto/create-room.dto';
 import { UpdateRoomDto } from './dto/update-room.dto';
-import { InjectModel } from '@nestjs/mongoose';
 import { Room } from './schemas/room.schemas';
-import { Model } from 'mongoose';
 
 @Injectable()
 export class RoomsService {
-  constructor(@InjectModel(Room.name) private roomModel: Model<Room>) {}
-  async create(createRoomDto: CreateRoomDto): Promise<Room> {
-    const result = await this.roomModel.create(createRoomDto);
+  constructor(
+    @InjectModel(Room.name) private roomModel: Model<Room>,
 
-    return result;
+    private readonly locationServices: LocationsService,
+  ) {}
+  async create(createRoomDto: CreateRoomDto): Promise<Room> {
+    await this.locationServices.findOne(createRoomDto.locationId);
+
+    return await this.roomModel.create(createRoomDto);
   }
 
   async findAll(): Promise<Room[]> {
@@ -21,16 +26,16 @@ export class RoomsService {
   async findOne(id: string): Promise<Room> {
     return this.roomModel.findOne({ _id: id }).exec();
   }
-  async update(id: string, updateRoomDto: UpdateRoomDto) {
+  async update(id: string, updateRoomDto: UpdateRoomDto): Promise<Room> {
     await this.roomModel.updateOne({ _id: id }, updateRoomDto).exec();
 
     return this.findOne(id);
   }
 
-  async remove(id: string) {
-    const deletedCat = await this.roomModel
+  async remove(id: string): Promise<Room> {
+    const deletedItem = await this.roomModel
       .findByIdAndRemove({ _id: id })
       .exec();
-    return deletedCat;
+    return deletedItem;
   }
 }
