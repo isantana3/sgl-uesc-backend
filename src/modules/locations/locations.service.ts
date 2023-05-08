@@ -2,7 +2,7 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { CreateLocationDto } from './dto/create-location.dto';
 import { UpdateLocationDto } from './dto/update-location.dto';
 import { InjectModel } from '@nestjs/mongoose';
-import { Location } from './entities/location.schemas';
+import { Location } from './schemas/location.schemas';
 import { Model } from 'mongoose';
 
 @Injectable()

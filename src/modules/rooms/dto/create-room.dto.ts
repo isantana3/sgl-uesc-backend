@@ -5,7 +5,7 @@ export class CreateRoomDto {
   @IsString({ message: 'label deve ser do tipo string' })
   @IsNotEmpty({ message: 'label é obrigatório' })
   @ApiProperty({
-    example: 'Laboratório 19',
+    example: 'Laboratório 20',
     examples: ['Laboratório 19', 'Sala 13', 'Auditório João Gomes'],
   })
   label: string;

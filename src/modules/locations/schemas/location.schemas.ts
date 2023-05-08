@@ -12,5 +12,9 @@ export class Location {
 
   @Prop()
   observation: string;
+
+  constructor(partial?: Partial<Location>) {
+    Object.assign(this, partial);
+  }
 }
 export const LocationSchema = SchemaFactory.createForClass(Location);
