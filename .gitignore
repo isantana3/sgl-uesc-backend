@@ -38,4 +38,5 @@ yarn.lock
 package-lock.json
 
 .env
-.env.*
+.env.production
+.env.development
