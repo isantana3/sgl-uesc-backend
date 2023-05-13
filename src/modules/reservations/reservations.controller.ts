@@ -6,11 +6,17 @@ import {
   Patch,
   Param,
   Delete,
+  Query,
 } from '@nestjs/common';
 import { ReservationsService } from './reservations.service';
 import { CreateReservationDto } from './dto/create-reservation.dto';
+import { FindReservationFilterDto } from './dto/find-reservations-filter-dto';
 import { UpdateReservationDto } from './dto/update-reservation.dto';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { Reservation } from './schemas/reservation.schemas';
 
+@ApiBearerAuth()
+@ApiTags('Reservas - Reservations')
 @Controller('reservations')
 export class ReservationsController {
   constructor(private readonly reservationsService: ReservationsService) {}
@@ -33,8 +39,15 @@ export class ReservationsController {
   }
 
   @Get()
-  findAll() {
-    return this.reservationsService.findAll();
+  // async findAll(@Query() filterDto: FindReservationFilterDto): Promise<Reservation[]> {
+  findAll(@Query() filterDto: FindReservationFilterDto) {
+    console.log('Query: ', filterDto)
+    if(Object.keys(filterDto).length){
+      return this.reservationsService.findFilters(filterDto);
+    }
+    else{
+      return this.reservationsService.findAll();
+    }
   }
 
   @Get(':id')
