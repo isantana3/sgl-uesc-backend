@@ -27,6 +27,10 @@ export class User {
 
   @Prop({ required: true })
   role: TRole;
+
+  constructor(partial?: Partial<User>) {
+    Object.assign(this, partial);
+  }
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
