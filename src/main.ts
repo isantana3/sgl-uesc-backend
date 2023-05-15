@@ -10,7 +10,7 @@ async function bootstrap() {
   app.setGlobalPrefix(process.env.URL_PREFIX);
   const config = new DocumentBuilder()
     .setTitle('SGL-UESC')
-    .setDescription('The SGL-UESC API description')
+    .setDescription('Sistema de Gestão de laboratórios da uesc (SGL-UESC)')
     .setVersion('1.0')
     .build();
   const optionsSwagger = {

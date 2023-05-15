@@ -14,7 +14,9 @@ export class ReservationsService {
 
     private readonly usersService: UsersService,
   ) {}
-  async create(createReservationDto: CreateReservationDto): Promise<Reservation> {
+  async create(
+    createReservationDto: CreateReservationDto,
+  ): Promise<Reservation> {
     const responsibleExists = await this.usersService.findOne(
       createReservationDto.responsible,
     );
@@ -30,13 +32,9 @@ export class ReservationsService {
     return await this.reservationModel.create(createReservationDto);
   }
 
-  async findAll(): Promise<Reservation[]> {
-    return this.reservationModel.find().populate('locationId').exec();
-  }
-  
-  async findFilters(filterDto: FindReservationFilterDto): Promise<Reservation[]> {
+  async findAll(filterDto?: FindReservationFilterDto): Promise<Reservation[]> {
     const query = this.reservationModel.find();
-    const {startDate, endDate} = filterDto;
+    const { startDate, endDate } = filterDto;
 
     if (startDate) {
       query.where({ startDate: { $gte: startDate } });
@@ -48,7 +46,6 @@ export class ReservationsService {
 
     query.populate('locationId');
     return query.exec();
-
   }
 
   async findOne(id: string): Promise<Reservation> {
@@ -67,8 +64,13 @@ export class ReservationsService {
     }
     return result;
   }
-  async update(id: string, updateReservationDto: UpdateReservationDto): Promise<Reservation> {
-    await this.reservationModel.updateOne({ _id: id }, updateReservationDto).exec();
+  async update(
+    id: string,
+    updateReservationDto: UpdateReservationDto,
+  ): Promise<Reservation> {
+    await this.reservationModel
+      .updateOne({ _id: id }, updateReservationDto)
+      .exec();
 
     return this.findOne(id);
   }

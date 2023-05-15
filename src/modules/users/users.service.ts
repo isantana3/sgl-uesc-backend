@@ -7,18 +7,16 @@ import { InjectModel } from '@nestjs/mongoose';
 
 @Injectable()
 export class UsersService {
-  constructor(
-    @InjectModel(User.name) private userModel: Model<User>,
-  ) {}
+  constructor(@InjectModel(User.name) private userModel: Model<User>) {}
   async create(createUserDto: CreateUserDto): Promise<User> {
     return this.userModel.create(createUserDto);
   }
 
   async findAll(): Promise<User[]> {
-    return this.userModel.find().exec();;
+    return this.userModel.find().exec();
   }
 
-  async findOne(id: number): Promise<User> {
+  async findOne(id: string): Promise<User> {
     const result = await this.userModel.findOne({ _id: id }).exec();
     if (!result) {
       throw new HttpException(
@@ -32,15 +30,13 @@ export class UsersService {
     return result;
   }
 
-  async update(id: number, 
-    updateUserDto: UpdateUserDto, 
-    ): Promise<User>  {
-      await this.userModel.updateOne({ _id: id }, updateUserDto).exec();
+  async update(id: string, updateUserDto: UpdateUserDto): Promise<User> {
+    await this.userModel.updateOne({ _id: id }, updateUserDto).exec();
 
-      return this.findOne(id);
+    return this.findOne(id);
   }
 
-  async remove(id: number): Promise<User> {
+  async remove(id: string): Promise<User> {
     const deletedItem = await this.userModel
       .findByIdAndRemove({ _id: id })
       .exec();

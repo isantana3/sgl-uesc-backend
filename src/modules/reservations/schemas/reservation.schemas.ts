@@ -3,7 +3,7 @@ import mongoose, { HydratedDocument } from 'mongoose';
 import { User } from 'src/modules/users/schemas/user.schemas';
 
 export type ReservationDocument = HydratedDocument<Reservation>;
-export type TStatus = 'reserved' | 'cancelled';
+export type TStatus = 'reserved' | 'cancelled' | 'finished';
 
 @Schema({ timestamps: true })
 export class Reservation {
@@ -30,7 +30,7 @@ export class Reservation {
   endDate: Date;
 
   @Prop({ default: 'reserved', required: true })
-  status: boolean;
+  status: TStatus;
 }
 
 export const ReservationSchema = SchemaFactory.createForClass(Reservation);

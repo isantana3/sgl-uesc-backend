@@ -1,19 +1,19 @@
 import {
-  Controller,
-  Get,
-  Post,
   Body,
-  Patch,
-  Param,
+  Controller,
   Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
   Query,
 } from '@nestjs/common';
-import { ReservationsService } from './reservations.service';
+import { ApiBearerAuth, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { CreateReservationDto } from './dto/create-reservation.dto';
 import { FindReservationFilterDto } from './dto/find-reservations-filter-dto';
 import { UpdateReservationDto } from './dto/update-reservation.dto';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { Reservation } from './schemas/reservation.schemas';
+import { ReservationsService } from './reservations.service';
+import { ResponseReservationDto } from './dto/response-reservation.dto';
 
 @ApiBearerAuth()
 @ApiTags('Reservas - Reservations')
@@ -34,28 +34,43 @@ export class ReservationsController {
   // Verificar se possui reserva de uma sala em uma data específica
 
   @Post()
+  @ApiResponse({
+    status: 201,
+    description: 'Dado criado com sucesso',
+    type: ResponseReservationDto,
+  })
   create(@Body() createReservationDto: CreateReservationDto) {
     return this.reservationsService.create(createReservationDto);
   }
 
   @Get()
-  // async findAll(@Query() filterDto: FindReservationFilterDto): Promise<Reservation[]> {
+  @ApiResponse({
+    status: 200,
+    description: 'Dados listados com sucesso',
+    isArray: true,
+    type: ResponseReservationDto,
+  })
   findAll(@Query() filterDto: FindReservationFilterDto) {
-    console.log('Query: ', filterDto)
-    if(Object.keys(filterDto).length){
-      return this.reservationsService.findFilters(filterDto);
-    }
-    else{
-      return this.reservationsService.findAll();
-    }
+    // console.log('Query: ', filterDto);
+    return this.reservationsService.findAll(filterDto);
   }
 
   @Get(':id')
+  @ApiResponse({
+    status: 200,
+    description: 'Visualização de dado realizada com sucesso',
+    type: ResponseReservationDto,
+  })
   findOne(@Param('id') id: string) {
     return this.reservationsService.findOne(id);
   }
 
   @Patch(':id')
+  @ApiResponse({
+    status: 200,
+    description: 'Atualização de dado realizada com sucesso',
+    type: ResponseReservationDto,
+  })
   update(
     @Param('id') id: string,
     @Body() updateReservationDto: UpdateReservationDto,
@@ -64,6 +79,11 @@ export class ReservationsController {
   }
 
   @Delete(':id')
+  @ApiResponse({
+    status: 200,
+    description: 'Deleção de dado realizada com sucesso',
+    type: ResponseReservationDto,
+  })
   remove(@Param('id') id: string) {
     return this.reservationsService.remove(id);
   }

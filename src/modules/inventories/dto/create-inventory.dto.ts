@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsString, Length } from 'class-validator';
+import { IsNotEmpty, IsOptional, IsString, Length } from 'class-validator';
 
 export class CreateInventoryDto {
   @IsString({ message: 'label deve ser do tipo string' })
@@ -28,9 +28,13 @@ export class CreateInventoryDto {
   })
   roomId: string;
 
-  @ApiProperty({ example: 'Item cor vermelho' })
+  @IsOptional()
+  @IsString({ message: 'description deve ser do tipo string' })
+  @ApiProperty({ example: 'Item cor vermelho', required: false })
   description: string;
 
-  @ApiProperty({ example: 'Item possui avarias' })
+  @IsOptional()
+  @IsString({ message: 'observation deve ser do tipo string' })
+  @ApiProperty({ example: 'Item possui avarias', required: false })
   observation: string;
 }

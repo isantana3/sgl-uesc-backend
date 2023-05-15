@@ -1,56 +1,81 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsString, IsDate, IsBoolean } from 'class-validator';
+import {
+  IsDateString,
+  IsEnum,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+} from 'class-validator';
+import { TStatus } from '../schemas/reservation.schemas';
 
 export class CreateReservationDto {
-    @IsString({ message: 'O título deve ser do tipo string' })
-    @IsNotEmpty({ message: 'O título é obrigatório' })
-    @ApiProperty({
-      example: 'Reserva Lab 20',
-      examples: ['Reserva Laboratório 19', 'Reserva Sala 13', 'Reserva Auditório João Gomes'],
-    })
-    label: string;
-    
-    @IsString({ message: 'A observação prévia deve ser do tipo string' })
-    @IsNotEmpty({ message: 'A observação prévia é obrigatório' })
-    @ApiProperty({
-      example: 'Ventilador não estava funcionando',
-      examples: ['Ventilador não estava funcionando', 'Sem datashow', 'Arcondicionado quebrado'],
-    })
-    previousObservation: string;
-    
-    @IsString({ message: 'A observação posterior deve ser do tipo string' })
-    @ApiProperty({
-      example: 'Ventilador parou de funcionar',
-      examples: ['Ventilador parou de funcionar', 'Datashow quebrou', 'Arcondicionado não está desligando'],
-    })
-    laterObservation: string;
-  
-    @IsString({ message: 'responsibleId deve ser do tipo number' })
-    @IsNotEmpty({ message: 'responsibleId é obrigatório' })
-    @ApiProperty({ example: '643d998881fdb61d5d0b1868' })
-    responsible: number;
+  @IsString({ message: 'O label deve ser do tipo string' })
+  @IsNotEmpty({ message: 'O label é obrigatório' })
+  @ApiProperty({
+    example: 'Aula de programação 1',
+    examples: [
+      'Palestra TecnoJr',
+      'Minicurso de Geografia',
+      'Reserva Auditório João Gomes',
+    ],
+  })
+  label: string;
 
-    @IsNotEmpty({ message: 'A data de início é obrigatória' })
-    @IsDate({ message: 'A data de início deve ser uma data válida' })
-    @ApiProperty({
-        example: '2023-06-15T10:00:00.000Z',
-        description: 'Data e hora de início da reserva no formato ISO 8601',
-      })
-    startDate: Date;
+  @IsString({ message: 'A previousObservation deve ser do tipo string' })
+  @IsNotEmpty({ message: 'A previousObservation é obrigatório' })
+  @ApiProperty({
+    example: 'Ventilador não estava funcionando',
+    examples: [
+      'Ventilador não estava funcionando',
+      'Sem data-show',
+      'Ar-condicionado quebrado',
+    ],
+  })
+  previousObservation: string;
 
-    @IsNotEmpty({ message: 'A data de término é obrigatória' })
-    @IsDate({ message: 'A data de término deve ser uma data válida' })
-    @ApiProperty({
-        example: '2023-06-15T12:00:00.000Z',
-        description: 'Data e hora de término da reserva no formato ISO 8601',
-    })
-    endDate: Date;
-    
-    @IsNotEmpty({ message: 'O status é obrigatório' })
-    @IsBoolean({ message: 'O status deve ser do tipo booleano' })
-    @ApiProperty({
-        example: true,
-        description: 'Indica se a reserva foi confirmada ou não',
-    })
-    status: boolean;
+  @IsOptional()
+  @IsString({
+    message: 'A laterObservation deve ser do tipo string',
+  })
+  @ApiProperty({
+    example: 'Ventilador parou de funcionar',
+    examples: [
+      'Ventilador parou de funcionar',
+      'Data-show quebrou',
+      'Ar-condicionado não está desligando',
+    ],
+  })
+  laterObservation: string;
+
+  @IsString({ message: 'responsible deve ser do tipo string' })
+  @IsNotEmpty({ message: 'responsible é obrigatório' })
+  @ApiProperty({ example: '643d998881fdb61d5d0b1868' })
+  responsible: string;
+
+  @IsNotEmpty({ message: 'A startDate é obrigatória' })
+  @IsDateString({}, { message: 'A startDate deve ser uma data válida' })
+  @ApiProperty({
+    example: '2023-06-15T10:00:00.000Z',
+    description: 'Data e hora de início da reserva no formato ISO 8601',
+  })
+  startDate: Date;
+
+  @IsNotEmpty({ message: 'A data de término é obrigatória' })
+  @IsDateString({}, { message: 'A data de término deve ser uma data válida' })
+  @ApiProperty({
+    example: '2023-06-15T12:00:00.000Z',
+    description: 'Data e hora de término da reserva no formato ISO 8601',
+  })
+  endDate: Date;
+
+  @IsNotEmpty({ message: 'O status é obrigatório' })
+  @IsEnum(['reserved', 'cancelled', 'finished'], {
+    message: 'O status deve: reserved, cancelled ou finished',
+  })
+  @ApiProperty({
+    example: 'reserved',
+    description: 'Indica se a reserva foi confirmada, finalizada ou cancelada',
+    examples: ['reserved', 'cancelled', 'finished'],
+  })
+  status: TStatus;
 }
