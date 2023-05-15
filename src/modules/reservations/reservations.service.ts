@@ -44,14 +44,14 @@ export class ReservationsService {
       query.where({ endDate: { $lt: endDate } });
     }
 
-    query.populate('locationId');
+    query.populate('responsible');
     return query.exec();
   }
 
   async findOne(id: string): Promise<Reservation> {
     const result = await this.reservationModel
       .findOne({ _id: id })
-      .populate('locationId')
+      .populate('responsible')
       .exec();
     if (!result) {
       throw new HttpException(
