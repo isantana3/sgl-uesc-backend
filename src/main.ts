@@ -6,7 +6,13 @@ import { TransformInterceptor } from './interceptors/transform.interceptor';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-
+  app.enableCors({
+    // origin: [
+    //   'http://localhost:3000'
+    // ],
+    // methods: ['GET', 'POST'],
+    // credentials: true,
+  });
   app.setGlobalPrefix(process.env.URL_PREFIX);
   const config = new DocumentBuilder()
     .setTitle('SGL-UESC')
