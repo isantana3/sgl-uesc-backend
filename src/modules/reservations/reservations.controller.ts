@@ -14,6 +14,8 @@ import { FindReservationFilterDto } from './dto/find-reservations-filter-dto';
 import { UpdateReservationDto } from './dto/update-reservation.dto';
 import { ReservationsService } from './reservations.service';
 import { ResponseReservationDto } from './dto/response-reservation.dto';
+import { ResponseRoomDto } from '../rooms/dto/response-room.dto';
+import { AvailableRoomsDto } from './dto/available-rooms.dto';
 
 @ApiBearerAuth()
 @ApiTags('Reservas - Reservations')
@@ -61,6 +63,16 @@ export class ReservationsController {
       status,
     });
   }
+  @Get('/available-rooms')
+  @ApiResponse({
+    status: 200,
+    description: 'Dados listados com sucesso',
+
+    type: ResponseRoomDto,
+  })
+  getAvailableRoom(@Query() availableRoomsDto: AvailableRoomsDto) {
+    return this.reservationsService.getAvailableRoom(availableRoomsDto);
+  }
 
   @Get()
   @ApiResponse({
@@ -72,11 +84,11 @@ export class ReservationsController {
   findAll(@Query() filterDto: FindReservationFilterDto) {
     return this.reservationsService.findAll(filterDto);
   }
-
   @Get(':id')
   @ApiResponse({
     status: 200,
     description: 'Visualização de dado realizada com sucesso',
+    isArray: true,
     type: ResponseReservationDto,
   })
   findOne(@Param('id') id: string) {
