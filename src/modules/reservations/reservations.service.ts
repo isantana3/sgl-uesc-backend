@@ -2,10 +2,11 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { UsersService } from 'src/modules/users/users.service';
-import { Reservation } from './schemas/reservation.schemas';
+import { RoomsService } from '../rooms/rooms.service';
 import { CreateReservationDto } from './dto/create-reservation.dto';
-import { UpdateReservationDto } from './dto/update-reservation.dto';
 import { FindReservationFilterDto } from './dto/find-reservations-filter-dto';
+import { UpdateReservationDto } from './dto/update-reservation.dto';
+import { Reservation } from './schemas/reservation.schemas';
 
 @Injectable()
 export class ReservationsService {
@@ -13,10 +14,12 @@ export class ReservationsService {
     @InjectModel(Reservation.name) private reservationModel: Model<Reservation>,
 
     private readonly usersService: UsersService,
+    private readonly roomsService: RoomsService,
   ) {}
   async create(
     createReservationDto: CreateReservationDto,
   ): Promise<Reservation> {
+    await this.roomsService.findOne(createReservationDto.room);
     const responsibleExists = await this.usersService.findOne(
       createReservationDto.responsible,
     );
@@ -44,7 +47,13 @@ export class ReservationsService {
       query.where({ endDate: { $lt: endDate } });
     }
 
-    query.populate('responsible');
+    query.populate('responsible').populate({
+      path: 'room',
+      populate: {
+        path: 'pavilion',
+        model: 'Pavilion',
+      },
+    });
     return query.exec();
   }
 

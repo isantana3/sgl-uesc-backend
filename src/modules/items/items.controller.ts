@@ -25,7 +25,15 @@ export class ItemsController {
     type: ResponseItemDto,
   })
   create(@Body() createItemDto: CreateItemDto) {
-    return this.itemsService.create(createItemDto);
+    const { code, description, label, observation, room } = createItemDto;
+
+    return this.itemsService.create({
+      code,
+      description,
+      label,
+      observation,
+      room,
+    });
   }
 
   @Get()
@@ -56,7 +64,14 @@ export class ItemsController {
     type: ResponseItemDto,
   })
   update(@Param('id') id: string, @Body() updateItemDto: UpdateItemDto) {
-    return this.itemsService.update(id, updateItemDto);
+    const { code, description, label, observation, room } = updateItemDto;
+    return this.itemsService.update(id, {
+      code,
+      description,
+      label,
+      observation,
+      room,
+    });
   }
 
   @Delete(':id')

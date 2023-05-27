@@ -26,7 +26,8 @@ export class PavilionsController {
     type: ResponsePavilionDto,
   })
   create(@Body() createPavilionDto: CreatePavilionDto) {
-    return this.pavilionsService.create(createPavilionDto);
+    const { description, label, observation } = createPavilionDto;
+    return this.pavilionsService.create({ description, label, observation });
   }
 
   @Get()
@@ -60,7 +61,12 @@ export class PavilionsController {
     @Param('id') id: string,
     @Body() updatePavilionDto: UpdatePavilionDto,
   ) {
-    return this.pavilionsService.update(id, updatePavilionDto);
+    const { description, label, observation } = updatePavilionDto;
+    return this.pavilionsService.update(id, {
+      description,
+      label,
+      observation,
+    });
   }
 
   @Delete(':id')

@@ -1,5 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import mongoose, { HydratedDocument } from 'mongoose';
+import { Room } from 'src/modules/rooms/schemas/room.schemas';
 import { User } from 'src/modules/users/schemas/user.schemas';
 
 export type ReservationDocument = HydratedDocument<Reservation>;
@@ -22,6 +23,13 @@ export class Reservation {
     ref: User.name,
   })
   responsible: User;
+
+  @Prop({
+    required: true,
+    type: mongoose.Schema.Types.ObjectId,
+    ref: Room.name,
+  })
+  room: Room;
 
   @Prop({ required: true })
   startDate: Date;

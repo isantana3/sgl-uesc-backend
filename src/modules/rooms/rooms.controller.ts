@@ -26,7 +26,8 @@ export class RoomsController {
     type: ResponseRoomDto,
   })
   create(@Body() createRoomDto: CreateRoomDto) {
-    return this.roomsService.create(createRoomDto);
+    const { label, pavilion } = createRoomDto;
+    return this.roomsService.create({ label, pavilion });
   }
 
   @Get()
@@ -57,7 +58,8 @@ export class RoomsController {
     type: ResponseRoomDto,
   })
   update(@Param('id') id: string, @Body() updateRoomDto: UpdateRoomDto) {
-    return this.roomsService.update(id, updateRoomDto);
+    const { label, pavilion } = updateRoomDto;
+    return this.roomsService.update(id, { label, pavilion });
   }
 
   @Delete(':id')

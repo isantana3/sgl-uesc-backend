@@ -40,7 +40,26 @@ export class ReservationsController {
     type: ResponseReservationDto,
   })
   create(@Body() createReservationDto: CreateReservationDto) {
-    return this.reservationsService.create(createReservationDto);
+    const {
+      endDate,
+      label,
+      laterObservation,
+      previousObservation,
+      responsible,
+      room,
+      startDate,
+      status,
+    } = createReservationDto;
+    return this.reservationsService.create({
+      endDate,
+      label,
+      laterObservation,
+      previousObservation,
+      responsible,
+      room,
+      startDate,
+      status,
+    });
   }
 
   @Get()
@@ -51,7 +70,6 @@ export class ReservationsController {
     type: ResponseReservationDto,
   })
   findAll(@Query() filterDto: FindReservationFilterDto) {
-    // console.log('Query: ', filterDto);
     return this.reservationsService.findAll(filterDto);
   }
 
@@ -75,7 +93,26 @@ export class ReservationsController {
     @Param('id') id: string,
     @Body() updateReservationDto: UpdateReservationDto,
   ) {
-    return this.reservationsService.update(id, updateReservationDto);
+    const {
+      endDate,
+      label,
+      laterObservation,
+      previousObservation,
+      responsible,
+      room,
+      startDate,
+      status,
+    } = updateReservationDto;
+    return this.reservationsService.update(id, {
+      endDate,
+      label,
+      laterObservation,
+      previousObservation,
+      responsible,
+      room,
+      startDate,
+      status,
+    });
   }
 
   @Delete(':id')

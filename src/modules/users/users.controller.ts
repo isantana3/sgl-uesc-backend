@@ -26,7 +26,15 @@ export class UsersController {
     type: ResponseUserDto,
   })
   create(@Body() createUserDto: CreateUserDto) {
-    return this.usersService.create(createUserDto);
+    const { email, name, office, password, registration, role } = createUserDto;
+    return this.usersService.create({
+      email,
+      name,
+      office,
+      password,
+      registration,
+      role,
+    });
   }
 
   @Get()
@@ -57,7 +65,15 @@ export class UsersController {
     type: ResponseUserDto,
   })
   update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.usersService.update(id, updateUserDto);
+    const { email, name, office, password, registration, role } = updateUserDto;
+    return this.usersService.update(id, {
+      email,
+      name,
+      office,
+      password,
+      registration,
+      role,
+    });
   }
 
   @Delete(':id')

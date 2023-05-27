@@ -4,6 +4,7 @@ import { ReservationsController } from './reservations.controller';
 import { ReservationsService } from './reservations.service';
 import { Reservation, ReservationSchema } from './schemas/reservation.schemas';
 import { UsersModule } from '../users/users.module';
+import { RoomsModule } from '../rooms/rooms.module';
 
 @Module({
   imports: [
@@ -11,6 +12,7 @@ import { UsersModule } from '../users/users.module';
       { name: Reservation.name, schema: ReservationSchema },
     ]),
     UsersModule,
+    RoomsModule,
   ],
   controllers: [ReservationsController],
   providers: [ReservationsService],

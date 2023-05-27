@@ -52,6 +52,11 @@ export class CreateReservationDto {
   @ApiProperty({ example: '643d998881fdb61d5d0b1868' })
   responsible: string;
 
+  @IsString({ message: 'room deve ser do tipo string' })
+  @IsNotEmpty({ message: 'room é obrigatório' })
+  @ApiProperty({ example: '643d998881fdb61d5d0b1868' })
+  room: string;
+
   @IsNotEmpty({ message: 'A startDate é obrigatória' })
   @IsDateString({}, { message: 'A startDate deve ser uma data válida' })
   @ApiProperty({
