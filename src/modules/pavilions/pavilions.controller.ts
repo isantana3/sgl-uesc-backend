@@ -14,7 +14,7 @@ import { UpdatePavilionDto } from './dto/update-pavilion.dto';
 import { PavilionsService } from './pavilions.service';
 
 @ApiBearerAuth()
-@ApiTags('Localizações - Pavilions')
+@ApiTags('Pavilhões - Pavilions')
 @Controller('pavilions')
 export class PavilionsController {
   constructor(private readonly pavilionsService: PavilionsService) {}

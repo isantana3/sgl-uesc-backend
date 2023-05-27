@@ -13,7 +13,7 @@ import { UpdateItemDto } from './dto/update-item.dto';
 import { ItemsService } from './items.service';
 import { ResponseItemDto } from './dto/response-item.dto';
 
-@ApiTags('Inventários - Items')
+@ApiTags('Itens - Items')
 @Controller('items')
 export class ItemsController {
   constructor(private readonly itemsService: ItemsService) {}
