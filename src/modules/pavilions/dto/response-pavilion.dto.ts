@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { CreateLocationDto } from './create-location.dto';
+import { CreatePavilionDto } from './create-pavilion.dto';
 
-export class ResponseLocationDto extends CreateLocationDto {
+export class ResponsePavilionDto extends CreatePavilionDto {
   @ApiProperty({
     example: '6456eda63f9ebbed160ec2fb',
     description: 'Id do dado',

@@ -3,8 +3,8 @@ import { ConfigModule } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { InventoriesModule } from './modules/inventories/inventories.module';
-import { LocationsModule } from './modules/locations/locations.module';
+import { ItemsModule } from './modules/items/items.module';
+import { PavilionsModule } from './modules/pavilions/pavilions.module';
 import { ReservationsModule } from './modules/reservations/reservations.module';
 import { RoomsModule } from './modules/rooms/rooms.module';
 import { UsersModule } from './modules/users/users.module';
@@ -13,9 +13,9 @@ import { UsersModule } from './modules/users/users.module';
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
     MongooseModule.forRoot(process.env.DB_URL),
-    LocationsModule,
+    PavilionsModule,
     RoomsModule,
-    InventoriesModule,
+    ItemsModule,
     ReservationsModule,
     UsersModule,
   ],

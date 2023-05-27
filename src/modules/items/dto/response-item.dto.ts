@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { CreateInventoryDto } from './create-inventory.dto';
+import { CreateItemDto } from './create-item.dto';
 
-export class ResponseInventoryDto extends CreateInventoryDto {
+export class ResponseItemDto extends CreateItemDto {
   @ApiProperty({
     example: '6456eda63f9ebbed160ec2fb',
     description: 'Id do dado',

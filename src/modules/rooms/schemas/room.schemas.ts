@@ -1,7 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Expose } from 'class-transformer';
 import mongoose, { HydratedDocument } from 'mongoose';
-import { Location } from 'src/modules/locations/schemas/location.schemas';
+import { Pavilion } from 'src/modules/pavilions/schemas/pavilion.schemas';
 
 export type RoomDocument = HydratedDocument<Room>;
 
@@ -13,10 +13,10 @@ export class Room {
   @Prop({
     required: true,
     type: mongoose.Schema.Types.ObjectId,
-    ref: Location.name,
+    ref: Pavilion.name,
   })
-  @Expose({ name: 'location' })
-  locationId: Location;
+  @Expose({ name: 'pavilion' })
+  pavilion: Pavilion;
 
   constructor(partial?: Partial<Room>) {
     Object.assign(this, partial);

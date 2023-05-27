@@ -2,9 +2,9 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import mongoose, { HydratedDocument } from 'mongoose';
 import { Room } from 'src/modules/rooms/schemas/room.schemas';
 
-export type InventoryDocument = HydratedDocument<Inventory>;
+export type ItemDocument = HydratedDocument<Item>;
 @Schema({ timestamps: true })
-export class Inventory {
+export class Item {
   @Prop({ required: true })
   label: string;
 
@@ -16,7 +16,7 @@ export class Inventory {
     type: mongoose.Schema.Types.ObjectId,
     ref: Room.name,
   })
-  roomId: Room;
+  room: Room;
 
   @Prop()
   description: string;
@@ -24,4 +24,4 @@ export class Inventory {
   @Prop()
   observation: string;
 }
-export const InventorySchema = SchemaFactory.createForClass(Inventory);
+export const ItemSchema = SchemaFactory.createForClass(Item);

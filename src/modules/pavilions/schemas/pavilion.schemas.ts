@@ -1,9 +1,9 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument } from 'mongoose';
-export type LocationDocument = HydratedDocument<Location>;
+export type PavilionDocument = HydratedDocument<Pavilion>;
 
 @Schema({ timestamps: true })
-export class Location {
+export class Pavilion {
   @Prop({ required: true })
   label: string;
 
@@ -13,8 +13,8 @@ export class Location {
   @Prop()
   observation: string;
 
-  constructor(partial?: Partial<Location>) {
+  constructor(partial?: Partial<Pavilion>) {
     Object.assign(this, partial);
   }
 }
-export const LocationSchema = SchemaFactory.createForClass(Location);
+export const PavilionSchema = SchemaFactory.createForClass(Pavilion);

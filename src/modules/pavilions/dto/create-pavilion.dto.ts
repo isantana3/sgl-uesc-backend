@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
-export class CreateLocationDto {
+export class CreatePavilionDto {
   @IsString({ message: 'label deve ser do tipo string' })
   @IsNotEmpty({ message: 'label é obrigatório' })
   @ApiProperty({

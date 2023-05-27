@@ -1,7 +1,7 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { LocationsService } from 'src/modules/locations/locations.service';
+import { PavilionsService } from 'src/modules/pavilions/pavilions.service';
 import { CreateRoomDto } from './dto/create-room.dto';
 import { UpdateRoomDto } from './dto/update-room.dto';
 import { Room } from './schemas/room.schemas';
@@ -11,13 +11,13 @@ export class RoomsService {
   constructor(
     @InjectModel(Room.name) private roomModel: Model<Room>,
 
-    private readonly locationServices: LocationsService,
+    private readonly pavilionServices: PavilionsService,
   ) {}
   async create(createRoomDto: CreateRoomDto): Promise<Room> {
-    const locationExists = await this.locationServices.findOne(
-      createRoomDto.locationId,
+    const pavilionExists = await this.pavilionServices.findOne(
+      createRoomDto.pavilion,
     );
-    if (!locationExists) {
+    if (!pavilionExists) {
       throw new HttpException(
         {
           status: HttpStatus.BAD_REQUEST,
@@ -26,17 +26,29 @@ export class RoomsService {
         HttpStatus.BAD_REQUEST,
       );
     }
-    return await this.roomModel.create(createRoomDto);
+    const newData = await this.roomModel.create(createRoomDto);
+    if (!newData) {
+      throw new HttpException(
+        {
+          status: HttpStatus.INTERNAL_SERVER_ERROR,
+          error: 'Erro interno',
+        },
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+    const data = await this.findOne(newData.id);
+
+    return data;
   }
 
   async findAll(): Promise<Room[]> {
-    return this.roomModel.find().populate('locationId').exec();
+    return this.roomModel.find().populate('pavilion').exec();
   }
 
   async findOne(id: string): Promise<Room> {
     const result = await this.roomModel
       .findOne({ _id: id })
-      .populate('locationId')
+      .populate('pavilion')
       .exec();
     if (!result) {
       throw new HttpException(

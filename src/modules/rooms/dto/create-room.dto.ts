@@ -10,8 +10,8 @@ export class CreateRoomDto {
   })
   label: string;
 
-  @IsString({ message: 'locationId deve ser do tipo string' })
-  @IsNotEmpty({ message: 'locationId é obrigatório' })
+  @IsString({ message: 'pavilion deve ser do tipo string' })
+  @IsNotEmpty({ message: 'pavilion é obrigatório' })
   @ApiProperty({ example: '643d998881fdb61d5d0b1868' })
-  locationId: string;
+  pavilion: string;
 }

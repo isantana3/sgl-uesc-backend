@@ -1,0 +1,98 @@
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { CreateItemDto } from './dto/create-item.dto';
+import { UpdateItemDto } from './dto/update-item.dto';
+import { InjectModel } from '@nestjs/mongoose';
+import { Item } from './schemas/item.schemas';
+import { Model } from 'mongoose';
+import { RoomsService } from '../rooms/rooms.service';
+
+@Injectable()
+export class ItemsService {
+  constructor(
+    @InjectModel(Item.name) private itemModel: Model<Item>,
+
+    private readonly roomsServices: RoomsService,
+  ) {}
+  private async checkRoomExists(room) {
+    const roomExists = await this.roomsServices.findOne(room);
+
+    if (!roomExists) {
+      throw new HttpException(
+        {
+          status: HttpStatus.BAD_REQUEST,
+          error: 'Room Not Found',
+        },
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+  }
+  async create(createItemDto: CreateItemDto) {
+    await this.checkRoomExists(createItemDto.room);
+
+    const newData = await this.itemModel.create(createItemDto);
+
+    if (!newData) {
+      throw new HttpException(
+        {
+          status: HttpStatus.INTERNAL_SERVER_ERROR,
+          error: 'Internal Error',
+        },
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+    const result = await this.findOne(newData.id);
+    return result;
+  }
+  async findAll(): Promise<Item[]> {
+    return this.itemModel
+      .find()
+      .populate({
+        path: 'room',
+        populate: {
+          path: 'pavilion',
+          model: 'Pavilion',
+        },
+      })
+      .exec();
+  }
+
+  async findOne(id: string): Promise<Item> {
+    const result = await this.itemModel
+      .findOne({ _id: id })
+      .populate({
+        path: 'room',
+        populate: {
+          path: 'pavilion',
+          model: 'Pavilion',
+        },
+      })
+      .exec();
+    if (!result) {
+      throw new HttpException(
+        {
+          status: HttpStatus.BAD_REQUEST,
+          error: 'Item Not Found',
+        },
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+    return result;
+  }
+
+  async update(id: string, updateRoomDto: UpdateItemDto): Promise<Item> {
+    if (updateRoomDto.room) {
+      await this.checkRoomExists(updateRoomDto.room);
+    }
+
+    await this.itemModel.updateOne({ _id: id }, updateRoomDto).exec();
+
+    return this.findOne(id);
+  }
+
+  async remove(id: string): Promise<Item> {
+    const deletedItem = await this.itemModel
+      .findByIdAndRemove({ _id: id })
+      .exec();
+    return deletedItem;
+  }
+}
