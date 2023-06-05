@@ -120,15 +120,21 @@ export class ReservationsService {
 
   async findAll(filterDto?: FindReservationFilterDto): Promise<Reservation[]> {
     const query = this.reservationModel.find();
-    const startDate  = filterDto.startDate;
-    const endDate  = filterDto.endDate;
 
-    if (startDate) {
-      query.where({ startDate: { $gte: startDate } });
+    if (filterDto.startDate) {
+      query.where({ startDate: { $gte: filterDto.startDate } });
     }
 
-    if (endDate) {
-      query.where({ endDate: { $lt: endDate } });
+    if (filterDto.endDate) {
+      query.where({ endDate: { $lt: filterDto.endDate } });
+    }
+    
+    if (filterDto.room) {
+      query.where({ room: filterDto.room });
+    }
+    
+    if (filterDto.responsible) {
+      query.where({ responsible: filterDto.responsible });
     }
 
     query.populate('responsible').populate({
@@ -145,6 +151,7 @@ export class ReservationsService {
     let skip = limitPage * (currentPage-1)
     
     query.limit(limitPage).skip(skip)
+
     return query.exec();
   }
 

@@ -27,10 +27,10 @@ export class ReservationsController {
   // Atualização
   // Visualização de todas as salas reservadas
   // - Por localização (pavilhão)
-  // - Por sala
-  // - Por dia, mostrar todas as salas disponíveis naquele dia
-  // - Por dia e hora, mostrar todas as salas disponíveis naquele horário
-  // - Admin -> Visualizar reservar por usuário
+  // - # Por sala
+  // - # Por dia, mostrar todas as salas disponíveis naquele dia
+  // - # Por dia e hora, mostrar todas as salas disponíveis naquele horário
+  // - # Admin -> Visualizar reservar por usuário
   // Visualização de uma reserva
   // Cancelar reserva
   // - Só administrador e usuário que reservou pode reservar sala
