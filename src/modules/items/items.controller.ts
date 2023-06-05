@@ -6,12 +6,14 @@ import {
   Param,
   Patch,
   Post,
+  Query,
 } from '@nestjs/common';
 import { ApiResponse, ApiTags } from '@nestjs/swagger';
 import { CreateItemDto } from './dto/create-item.dto';
 import { UpdateItemDto } from './dto/update-item.dto';
 import { ItemsService } from './items.service';
 import { ResponseItemDto } from './dto/response-item.dto';
+import { Query as ExpressQuery } from 'express-serve-static-core';
 
 @ApiTags('Itens - Items')
 @Controller('items')
@@ -43,8 +45,8 @@ export class ItemsController {
     isArray: true,
     type: ResponseItemDto,
   })
-  findAll() {
-    return this.itemsService.findAll();
+  findAll(@Query() query: ExpressQuery) {
+    return this.itemsService.findAll(query);
   }
 
   @Get(':id')

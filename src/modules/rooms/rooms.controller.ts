@@ -6,12 +6,14 @@ import {
   Param,
   Patch,
   Post,
+  Query,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { CreateRoomDto } from './dto/create-room.dto';
 import { ResponseRoomDto } from './dto/response-room.dto';
 import { UpdateRoomDto } from './dto/update-room.dto';
 import { RoomsService } from './rooms.service';
+import { Query as ExpressQuery } from 'express-serve-static-core';
 
 @ApiBearerAuth()
 @ApiTags('Salas - Rooms')
@@ -37,8 +39,8 @@ export class RoomsController {
     isArray: true,
     type: ResponseRoomDto,
   })
-  findAll() {
-    return this.roomsService.findAll();
+  findAll(@Query() query: ExpressQuery) {
+    return this.roomsService.findAll(query);
   }
 
   @Get(':id')

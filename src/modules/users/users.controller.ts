@@ -6,12 +6,14 @@ import {
   Param,
   Patch,
   Post,
+  Query
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { CreateUserDto } from './dto/create-user.dto';
 import { ResponseUserDto } from './dto/response-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UsersService } from './users.service';
+import { Query as ExpressQuery } from 'express-serve-static-core';
 
 @ApiBearerAuth()
 @ApiTags('Usuários - Users')
@@ -44,8 +46,8 @@ export class UsersController {
     isArray: true,
     type: ResponseUserDto,
   })
-  findAll() {
-    return this.usersService.findAll();
+  findAll(@Query() query: ExpressQuery) {
+    return this.usersService.findAll(query);
   }
 
   @Get(':id')

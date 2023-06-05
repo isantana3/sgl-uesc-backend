@@ -120,7 +120,8 @@ export class ReservationsService {
 
   async findAll(filterDto?: FindReservationFilterDto): Promise<Reservation[]> {
     const query = this.reservationModel.find();
-    const { startDate, endDate } = filterDto;
+    const startDate  = filterDto.startDate;
+    const endDate  = filterDto.endDate;
 
     if (startDate) {
       query.where({ startDate: { $gte: startDate } });
@@ -137,6 +138,13 @@ export class ReservationsService {
         model: 'Pavilion',
       },
     });
+
+    let limitPage = Number(filterDto.limit) || 10;
+    limitPage = limitPage > 100 ? 100 : limitPage;
+    let currentPage = Number(filterDto.page)|| 1
+    let skip = limitPage * (currentPage-1)
+    
+    query.limit(limitPage).skip(skip)
     return query.exec();
   }
 

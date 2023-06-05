@@ -5,6 +5,7 @@ import { PavilionsService } from 'src/modules/pavilions/pavilions.service';
 import { CreateRoomDto } from './dto/create-room.dto';
 import { UpdateRoomDto } from './dto/update-room.dto';
 import { Room } from './schemas/room.schemas';
+import { Query as ExpressQuery } from 'express-serve-static-core';
 
 @Injectable()
 export class RoomsService {
@@ -41,8 +42,13 @@ export class RoomsService {
     return data;
   }
 
-  async findAll(): Promise<Room[]> {
-    return this.roomModel.find().populate('pavilion').exec();
+  async findAll(query: ExpressQuery): Promise<Room[]> {
+    let limitPage = Number(query.limit) || 10;
+    limitPage = limitPage > 100 ? 100 : limitPage;
+    let currentPage = Number(query.page)|| 1
+    let skip = limitPage * (currentPage-1)
+
+    return this.roomModel.find().populate('pavilion').limit(limitPage).skip(skip).exec();
   }
 
   async findOne(id: string): Promise<Room> {
