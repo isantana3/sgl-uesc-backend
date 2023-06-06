@@ -5,6 +5,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Item } from './schemas/item.schemas';
 import { Model } from 'mongoose';
 import { RoomsService } from '../rooms/rooms.service';
+import { Query as ExpressQuery } from 'express-serve-static-core';
 
 @Injectable()
 export class ItemsService {
@@ -43,7 +44,11 @@ export class ItemsService {
     const result = await this.findOne(newData.id);
     return result;
   }
-  async findAll(): Promise<Item[]> {
+  async findAll(query: ExpressQuery): Promise<Item[]> {
+    let limitPage = Number(query.limit) || 10;
+    limitPage = limitPage > 100 ? 100 : limitPage;
+    let currentPage = Number(query.page)|| 1
+    let skip = limitPage * (currentPage-1)
     return this.itemModel
       .find()
       .populate({
@@ -53,6 +58,8 @@ export class ItemsService {
           model: 'Pavilion',
         },
       })
+      .limit(limitPage)
+      .skip(skip)
       .exec();
   }
 

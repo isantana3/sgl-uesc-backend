@@ -6,12 +6,14 @@ import {
   Param,
   Patch,
   Post,
+  Query,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { CreatePavilionDto } from './dto/create-pavilion.dto';
 import { ResponsePavilionDto } from './dto/response-pavilion.dto';
 import { UpdatePavilionDto } from './dto/update-pavilion.dto';
 import { PavilionsService } from './pavilions.service';
+import { Query as ExpressQuery } from 'express-serve-static-core';
 
 @ApiBearerAuth()
 @ApiTags('Pavilhões - Pavilions')
@@ -37,8 +39,8 @@ export class PavilionsController {
     isArray: true,
     type: ResponsePavilionDto,
   })
-  findAll() {
-    return this.pavilionsService.findAll();
+  findAll(@Query() query: ExpressQuery) {
+    return this.pavilionsService.findAll(query);
   }
 
   @Get(':id')
