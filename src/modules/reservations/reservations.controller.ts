@@ -16,6 +16,7 @@ import { ReservationsService } from './reservations.service';
 import { ResponseReservationDto } from './dto/response-reservation.dto';
 import { ResponseRoomDto } from '../rooms/dto/response-room.dto';
 import { AvailableRoomsDto } from './dto/available-rooms.dto';
+import { Query as ExpressQuery } from 'express-serve-static-core';
 
 @ApiBearerAuth()
 @ApiTags('Reservas - Reservations')
@@ -26,10 +27,10 @@ export class ReservationsController {
   // Atualização
   // Visualização de todas as salas reservadas
   // - Por localização (pavilhão)
-  // - Por sala
-  // - Por dia, mostrar todas as salas disponíveis naquele dia
-  // - Por dia e hora, mostrar todas as salas disponíveis naquele horário
-  // - Admin -> Visualizar reservar por usuário
+  // - # Por sala
+  // - # Por dia, mostrar todas as salas disponíveis naquele dia
+  // - # Por dia e hora, mostrar todas as salas disponíveis naquele horário
+  // - # Admin -> Visualizar reservar por usuário
   // Visualização de uma reserva
   // Cancelar reserva
   // - Só administrador e usuário que reservou pode reservar sala

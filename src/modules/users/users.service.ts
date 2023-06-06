@@ -4,6 +4,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './schemas/user.schemas';
 import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
+import { Query as ExpressQuery } from 'express-serve-static-core';
 
 @Injectable()
 export class UsersService {
@@ -12,8 +13,12 @@ export class UsersService {
     return this.userModel.create(createUserDto);
   }
 
-  async findAll(): Promise<User[]> {
-    return this.userModel.find().exec();
+  async findAll(query: ExpressQuery): Promise<User[]> {
+    let limitPage = Number(query.limit) || 10;
+    limitPage = limitPage > 100 ? 100 : limitPage;
+    let currentPage = Number(query.page)|| 1
+    let skip = limitPage * (currentPage-1)
+    return this.userModel.find().limit(limitPage).skip(skip).exec();
   }
 
   async findOne(id: string): Promise<User> {

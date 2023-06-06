@@ -4,6 +4,7 @@ import { UpdatePavilionDto } from './dto/update-pavilion.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Pavilion } from './schemas/pavilion.schemas';
 import { Model } from 'mongoose';
+import { Query as ExpressQuery } from 'express-serve-static-core';
 
 @Injectable()
 export class PavilionsService {
@@ -14,8 +15,13 @@ export class PavilionsService {
     return this.pavilionModel.create(createPavilionDto);
   }
 
-  async findAll(): Promise<Pavilion[]> {
-    return this.pavilionModel.find().exec();
+  async findAll(query: ExpressQuery): Promise<Pavilion[]> {
+    let limitPage = Number(query.limit) || 10;
+    limitPage = limitPage > 100 ? 100 : limitPage;
+    let currentPage = Number(query.page)|| 1
+    let skip = limitPage * (currentPage-1)
+
+    return this.pavilionModel.find().limit(limitPage).skip(skip).exec();
   }
 
   async findOne(id: string): Promise<Pavilion> {
