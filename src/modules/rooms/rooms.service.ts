@@ -6,6 +6,7 @@ import { CreateRoomDto } from './dto/create-room.dto';
 import { UpdateRoomDto } from './dto/update-room.dto';
 import { Room } from './schemas/room.schemas';
 import { Query as ExpressQuery } from 'express-serve-static-core';
+import { Response } from 'express';
 
 @Injectable()
 export class RoomsService {
@@ -42,13 +43,53 @@ export class RoomsService {
     return data;
   }
 
-  async findAll(query: ExpressQuery): Promise<Room[]> {
+  async findAll(query: ExpressQuery, url: string): Promise<Object> {
     let limitPage = Number(query.limit) || 10;
     limitPage = limitPage > 100 ? 100 : limitPage;
-    let currentPage = Number(query.page)|| 1
-    let skip = limitPage * (currentPage-1)
+    let currentPage = Number(query.page)|| 1;
+    let skip = limitPage * (currentPage-1);
 
-    return this.roomModel.find().populate('pavilion').limit(limitPage).skip(skip).exec();
+    const all_rooms =  await this.roomModel.find().populate('pavilion');
+
+    const lastPage = Math.ceil(all_rooms.length / limitPage);
+    const previousPage = (currentPage - 1) > 0 ? (currentPage - 1) : null;
+    const nextPage= (currentPage + 1) <= lastPage ? (currentPage + 1) : null;
+
+    const rooms = await this.roomModel.find().populate('pavilion').limit(limitPage).skip(skip).exec();
+    if (rooms.length == 0 && currentPage != 1){
+      throw new HttpException(
+        {
+          status: HttpStatus.NOT_FOUND,
+          error: 'Page Not Found',
+        },
+        HttpStatus.NOT_FOUND,
+      );
+    }
+
+    interface CustomResponse {
+      status: number;
+      data: {
+        currentPage: string;
+        previousPage: string | null;
+        nextPage: string | null;
+        lastPage: string | null;
+        data: Room[];
+      };
+    }
+    
+    const response: CustomResponse = {
+      status: 200,
+      data: {
+        currentPage: currentPage == null? null: url.replace(/(page=)\d+/, `$1${currentPage}`),
+        previousPage: previousPage == null? null: url.replace(/(page=)\d+/, `$1${previousPage}`),
+        nextPage: nextPage == null? null: url.replace(/(page=)\d+/, `$1${nextPage}`),
+        lastPage: lastPage == null? null: url.replace(/(page=)\d+/, `$1${lastPage}`),
+        data: rooms,
+      },
+    };
+    return response;
+    
+
   }
 
   async findOne(id: string): Promise<Room> {
