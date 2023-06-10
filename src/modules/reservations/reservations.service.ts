@@ -136,14 +136,27 @@ export class ReservationsService {
     if (filterDto.responsible) {
       query.where({ responsible: filterDto.responsible });
     }
+    
+    if (filterDto.pavilion) {
+      query.populate('responsible').populate({
+        path: 'room',
+        populate: {
+          path: 'pavilion',
+          model: 'Pavilion',
+          match: { _id: filterDto.pavilion },
+        },
+      });
+    }
+    else{
 
-    query.populate('responsible').populate({
-      path: 'room',
-      populate: {
-        path: 'pavilion',
-        model: 'Pavilion',
-      },
-    });
+      query.populate('responsible').populate({
+        path: 'room',
+        populate: {
+          path: 'pavilion',
+          model: 'Pavilion',
+        },
+      });
+    }
 
     const secondaryQuery = query.clone();
     const all_reservations = await secondaryQuery.exec()
@@ -159,7 +172,8 @@ export class ReservationsService {
 
     query.limit(limitPage).skip(skip)
 
-    const reservations = await query.exec();
+    const unfiltered_reservations = await query.exec();
+    const reservations = unfiltered_reservations.filter((reservation) => reservation.room && reservation.room.pavilion);
 
     if (reservations.length == 0 && currentPage != 1){
       throw new HttpException(

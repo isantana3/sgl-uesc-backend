@@ -22,10 +22,10 @@ export class FindReservationFilterDto {
   @ApiProperty({ example: '643d998881fdb61d5d0b1868' })
   responsible: string;
 
-  // @IsString({ message: 'pavilion deve ser do tipo string' })
-  // @IsOptional()
-  // @ApiProperty({ example: '643d998881fdb61d5d0b1868' })
-  // pavilion: string;
+  @IsString({ message: 'pavilion deve ser do tipo string' })
+  @IsOptional()
+  @ApiProperty({ example: '643d998881fdb61d5d0b1868' })
+  pavilion: string;
   
   @IsOptional()
   @IsNumberString()
