@@ -4,6 +4,7 @@ import {
   Delete,
   Get,
   Param,
+  Req,
   Patch,
   Post,
   Query,
@@ -16,7 +17,7 @@ import { ReservationsService } from './reservations.service';
 import { ResponseReservationDto } from './dto/response-reservation.dto';
 import { ResponseRoomDto } from '../rooms/dto/response-room.dto';
 import { AvailableRoomsDto } from './dto/available-rooms.dto';
-import { Query as ExpressQuery } from 'express-serve-static-core';
+import { Request } from 'express';
 
 @ApiBearerAuth()
 @ApiTags('Reservas - Reservations')
@@ -82,8 +83,9 @@ export class ReservationsController {
     isArray: true,
     type: ResponseReservationDto,
   })
-  findAll(@Query() filterDto: FindReservationFilterDto) {
-    return this.reservationsService.findAll(filterDto);
+  findAll(@Query() filterDto: FindReservationFilterDto, @Req() request: Request) {
+    const url = request.protocol + '://' + request.get('host') + request.originalUrl;
+    return this.reservationsService.findAll(url, filterDto);
   }
   @Get(':id')
   @ApiResponse({
