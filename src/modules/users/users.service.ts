@@ -13,12 +13,54 @@ export class UsersService {
     return this.userModel.create(createUserDto);
   }
 
-  async findAll(query: ExpressQuery): Promise<User[]> {
+  async findAll(query: ExpressQuery, url: string): Promise<Object> {
     let limitPage = Number(query.limit) || 10;
     limitPage = limitPage > 100 ? 100 : limitPage;
     let currentPage = Number(query.page)|| 1
     let skip = limitPage * (currentPage-1)
-    return this.userModel.find().limit(limitPage).skip(skip).exec();
+
+    const all_users = await this.userModel.find().exec()
+
+    const lastPage = Math.ceil(all_users.length / limitPage);
+    const previousPage = (currentPage - 1) > 0 ? (currentPage - 1) : null;
+    const nextPage= (currentPage + 1) <= lastPage ? (currentPage + 1) : null;
+
+
+    const users = await this.userModel.find().limit(limitPage).skip(skip).exec();
+
+    if (users.length == 0 && currentPage != 1){
+      throw new HttpException(
+        {
+          status: HttpStatus.NOT_FOUND,
+          error: 'Page Not Found',
+        },
+        HttpStatus.NOT_FOUND,
+      );
+    }
+
+    interface CustomResponse {
+      status: number;
+      data: {
+        currentPage: string;
+        previousPage: string | null;
+        nextPage: string | null;
+        lastPage: string | null;
+        data: User[];
+      };
+    }
+    
+    const response: CustomResponse = {
+      status: 200,
+      data: {
+        currentPage: currentPage == null? null: url.replace(/(page=)\d+/, `$1${currentPage}`),
+        previousPage: previousPage == null? null: url.replace(/(page=)\d+/, `$1${previousPage}`),
+        nextPage: nextPage == null? null: url.replace(/(page=)\d+/, `$1${nextPage}`),
+        lastPage: lastPage == null? null: url.replace(/(page=)\d+/, `$1${lastPage}`),
+        data: users,
+      },
+    };
+    return response;
+
   }
 
   async findOne(id: string): Promise<User> {

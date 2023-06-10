@@ -4,6 +4,7 @@ import {
   Delete,
   Get,
   Param,
+  Req,
   Patch,
   Post,
   Query,
@@ -14,6 +15,7 @@ import { UpdateItemDto } from './dto/update-item.dto';
 import { ItemsService } from './items.service';
 import { ResponseItemDto } from './dto/response-item.dto';
 import { Query as ExpressQuery } from 'express-serve-static-core';
+import { Request } from 'express';
 
 @ApiTags('Itens - Items')
 @Controller('items')
@@ -45,8 +47,9 @@ export class ItemsController {
     isArray: true,
     type: ResponseItemDto,
   })
-  findAll(@Query() query: ExpressQuery) {
-    return this.itemsService.findAll(query);
+  findAll(@Query() query: ExpressQuery, @Req() request: Request) {
+    const url = request.protocol + '://' + request.get('host') + request.originalUrl;
+    return this.itemsService.findAll(query, url);
   }
 
   @Get(':id')

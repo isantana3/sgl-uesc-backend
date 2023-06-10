@@ -1,4 +1,4 @@
-import { IsDateString, IsNumber, IsOptional, IsString } from 'class-validator';
+import { IsDateString, IsNumberString, IsOptional, IsString } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class FindReservationFilterDto {
@@ -28,10 +28,10 @@ export class FindReservationFilterDto {
   // pavilion: string;
   
   @IsOptional()
-  @IsNumber()
+  @IsNumberString()
   limit?: string;
 
   @IsOptional()
-  @IsNumber()
+  @IsNumberString()
   page?: string;
 }

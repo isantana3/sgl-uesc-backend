@@ -6,7 +6,6 @@ import { CreateRoomDto } from './dto/create-room.dto';
 import { UpdateRoomDto } from './dto/update-room.dto';
 import { Room } from './schemas/room.schemas';
 import { Query as ExpressQuery } from 'express-serve-static-core';
-import { Response } from 'express';
 
 @Injectable()
 export class RoomsService {

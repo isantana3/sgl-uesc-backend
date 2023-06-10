@@ -4,6 +4,7 @@ import {
   Delete,
   Get,
   Param,
+  Req,
   Patch,
   Post,
   Query,
@@ -14,6 +15,7 @@ import { ResponsePavilionDto } from './dto/response-pavilion.dto';
 import { UpdatePavilionDto } from './dto/update-pavilion.dto';
 import { PavilionsService } from './pavilions.service';
 import { Query as ExpressQuery } from 'express-serve-static-core';
+import { Request } from 'express';
 
 @ApiBearerAuth()
 @ApiTags('Pavilhões - Pavilions')
@@ -39,8 +41,9 @@ export class PavilionsController {
     isArray: true,
     type: ResponsePavilionDto,
   })
-  findAll(@Query() query: ExpressQuery) {
-    return this.pavilionsService.findAll(query);
+  findAll(@Query() query: ExpressQuery, @Req() request: Request) {
+    const url = request.protocol + '://' + request.get('host') + request.originalUrl;
+    return this.pavilionsService.findAll(query, url);
   }
 
   @Get(':id')
