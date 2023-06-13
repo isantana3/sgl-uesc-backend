@@ -4,7 +4,6 @@ import {
   Delete,
   Get,
   Param,
-  Req,
   Patch,
   Post,
   Query,
@@ -15,7 +14,6 @@ import { ResponseRoomDto } from './dto/response-room.dto';
 import { UpdateRoomDto } from './dto/update-room.dto';
 import { RoomsService } from './rooms.service';
 import { Query as ExpressQuery } from 'express-serve-static-core';
-import { Request } from 'express';
 
 @ApiBearerAuth()
 @ApiTags('Salas - Rooms')
@@ -41,9 +39,8 @@ export class RoomsController {
     isArray: true,
     type: ResponseRoomDto,
   })
-  findAll(@Query() query: ExpressQuery, @Req() request: Request) {
-    const url = request.protocol + '://' + request.get('host') + request.originalUrl;
-    return this.roomsService.findAll(query, url);
+  findAll(@Query() query: ExpressQuery) {
+    return this.roomsService.findAll(query);
   }
 
   @Get(':id')

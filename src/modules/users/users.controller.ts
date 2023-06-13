@@ -4,7 +4,6 @@ import {
   Delete,
   Get,
   Param,
-  Req,
   Patch,
   Post,
   Query
@@ -15,7 +14,6 @@ import { ResponseUserDto } from './dto/response-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UsersService } from './users.service';
 import { Query as ExpressQuery } from 'express-serve-static-core';
-import { Request } from 'express';
 
 @ApiBearerAuth()
 @ApiTags('Usuários - Users')
@@ -48,9 +46,8 @@ export class UsersController {
     isArray: true,
     type: ResponseUserDto,
   })
-  findAll(@Query() query: ExpressQuery, @Req() request: Request) {
-    const url = request.protocol + '://' + request.get('host') + request.originalUrl;
-    return this.usersService.findAll(query, url);
+  findAll(@Query() query: ExpressQuery) {
+    return this.usersService.findAll(query);
   }
 
   @Get(':id')

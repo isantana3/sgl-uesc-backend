@@ -118,7 +118,7 @@ export class ReservationsService {
     return await this.reservationModel.create(createReservationDto);
   }
 
-  async findAll(url: string, filterDto?: FindReservationFilterDto): Promise<Object> {
+  async findAll(filterDto?: FindReservationFilterDto): Promise<Object> {
     const query = this.reservationModel.find();
 
     if (filterDto.startDate) {
@@ -167,8 +167,6 @@ export class ReservationsService {
     let skip = limitPage * (currentPage-1)
     
     const lastPage = Math.ceil(all_reservations.length / limitPage);
-    const previousPage = (currentPage - 1) > 0 ? (currentPage - 1) : null;
-    const nextPage= (currentPage + 1) <= lastPage ? (currentPage + 1) : null;
 
     query.limit(limitPage).skip(skip)
 
@@ -188,10 +186,8 @@ export class ReservationsService {
     interface CustomResponse {
       status: number;
       data: {
-        currentPage: string;
-        previousPage: string | null;
-        nextPage: string | null;
-        lastPage: string | null;
+        currentPage: number;
+        lastPage: number | null;
         data: Reservation[];
       };
     }
@@ -199,10 +195,8 @@ export class ReservationsService {
     const response: CustomResponse = {
       status: 200,
       data: {
-        currentPage: currentPage == null? null: url.replace(/(page=)\d+/, `$1${currentPage}`),
-        previousPage: previousPage == null? null: url.replace(/(page=)\d+/, `$1${previousPage}`),
-        nextPage: nextPage == null? null: url.replace(/(page=)\d+/, `$1${nextPage}`),
-        lastPage: lastPage == null? null: url.replace(/(page=)\d+/, `$1${lastPage}`),
+        currentPage: currentPage,
+        lastPage: lastPage,
         data: reservations,
       },
     };
