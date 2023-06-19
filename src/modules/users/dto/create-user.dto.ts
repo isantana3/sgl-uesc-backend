@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { Exclude } from 'class-transformer';
 import {
   IsEmail,
   IsEnum,
@@ -6,8 +7,7 @@ import {
   IsString,
   MinLength,
 } from 'class-validator';
-import { TOffice, TRole } from '../schemas/user.schemas';
-import { Exclude } from 'class-transformer';
+import { TRole } from '../schemas/user.schemas';
 
 export class CreateUserDto {
   @IsString({ message: 'name deve ser do tipo string' })
@@ -45,8 +45,7 @@ export class CreateUserDto {
     example: 'professor',
     examples: ['professor', 'student', 'technician'],
   })
-  @IsEnum(['professor', 'student', 'technician'])
-  office: TOffice;
+  office: string;
 
   @IsString({ message: 'role deve ser do tipo string' })
   @IsNotEmpty({ message: 'role é obrigatório' })
@@ -56,4 +55,6 @@ export class CreateUserDto {
   })
   @IsEnum(['admin', 'manager', 'user'])
   role: TRole;
+
+  isActive?: boolean;
 }
