@@ -207,6 +207,13 @@ export class ReservationsService {
     const result = await this.reservationModel
       .findOne({ _id: id })
       .populate('responsible')
+      .populate({
+        path: 'room',
+        populate: {
+          path: 'pavilion',
+          model: 'Pavilion',
+        },
+      })
       .exec();
     if (!result) {
       throw new HttpException(
