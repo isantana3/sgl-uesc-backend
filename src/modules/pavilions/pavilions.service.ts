@@ -15,13 +15,45 @@ export class PavilionsService {
     return this.pavilionModel.create(createPavilionDto);
   }
 
-  async findAll(query: ExpressQuery): Promise<Pavilion[]> {
+  async findAll(query: ExpressQuery): Promise<Object> {
     let limitPage = Number(query.limit) || 10;
     limitPage = limitPage > 100 ? 100 : limitPage;
-    let currentPage = Number(query.page)|| 1
-    let skip = limitPage * (currentPage-1)
+    let currentPage = Number(query.page)|| 1;
+    let skip = limitPage * (currentPage-1);
 
-    return this.pavilionModel.find().limit(limitPage).skip(skip).exec();
+    const all_pavilions = await this.pavilionModel.find().exec();
+    const lastPage = Math.ceil(all_pavilions.length / limitPage);
+
+    const pavilions = await this.pavilionModel.find().limit(limitPage).skip(skip).exec();
+
+    if (pavilions.length == 0 && currentPage != 1){
+      throw new HttpException(
+        {
+          status: HttpStatus.NOT_FOUND,
+          error: 'Page Not Found',
+        },
+        HttpStatus.NOT_FOUND,
+      );
+    }
+
+    interface CustomResponse {
+      status: number;
+      data: {
+        currentPage: number;
+        lastPage: number | null;
+        data: Pavilion[];
+      };
+    }
+    
+    const response: CustomResponse = {
+      status: 200,
+      data: {
+        currentPage: currentPage,
+        lastPage: lastPage,
+        data: pavilions,
+      },
+    };
+    return response;
   }
 
   async findOne(id: string): Promise<Pavilion> {
