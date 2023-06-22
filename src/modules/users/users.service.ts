@@ -35,6 +35,7 @@ export class UsersService {
       );
     }
     const password = await hash(createUserDto.password, 8);
+
     createUserDto.password = password;
     const newUser = await this.userModel.create(createUserDto);
 
@@ -68,19 +69,22 @@ export class UsersService {
     return newUser;
   }
 
-  async findAll(query: ExpressQuery): Promise<Object> {
+  async findAll(query: ExpressQuery): Promise<any> {
     let limitPage = Number(query.limit) || 10;
     limitPage = limitPage > 100 ? 100 : limitPage;
-    let currentPage = Number(query.page)|| 1
-    let skip = limitPage * (currentPage-1)
+    const currentPage = Number(query.page) || 1;
+    const skip = limitPage * (currentPage - 1);
 
-    const all_users = await this.userModel.find().exec()
+    const all_users = await this.userModel.find().exec();
     const lastPage = Math.ceil(all_users.length / limitPage);
 
+    const users = await this.userModel
+      .find()
+      .limit(limitPage)
+      .skip(skip)
+      .exec();
 
-    const users = await this.userModel.find().limit(limitPage).skip(skip).exec();
-
-    if (users.length == 0 && currentPage != 1){
+    if (users.length == 0 && currentPage != 1) {
       throw new HttpException(
         {
           status: HttpStatus.NOT_FOUND,
@@ -98,17 +102,16 @@ export class UsersService {
         data: User[];
       };
     }
-    
+
     const response: CustomResponse = {
       status: 200,
       data: {
-        currentPage: currentPage ,
-        lastPage: lastPage ,
+        currentPage: currentPage,
+        lastPage: lastPage,
         data: users,
       },
     };
     return response;
-
   }
 
   async findOne(id: string): Promise<User> {

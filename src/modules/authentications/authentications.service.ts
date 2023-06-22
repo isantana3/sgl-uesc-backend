@@ -95,12 +95,8 @@ export class AuthenticationsService {
         HttpStatus.BAD_REQUEST,
       );
     }
-    const password = await hash(signUpDto.password, 8);
-    signUpDto.password = password;
-    const newUser = await this.usersService.create({
-      ...signUpDto,
-      isActive: false,
-    });
+
+    const newUser = await this.usersService.create(signUpDto);
 
     if (!newUser) {
       throw new HttpException(
@@ -133,7 +129,18 @@ export class AuthenticationsService {
 
   async login({ email, password }: LoginUserDto) {
     const user = await this.usersService.findByEmail(email);
+
+    if (!user.isActive) {
+      throw new HttpException(
+        {
+          status: HttpStatus.BAD_REQUEST,
+          error: 'Email or password mismatch 1',
+        },
+        HttpStatus.BAD_REQUEST,
+      );
+    }
     const passwordMatched = await compare(password, user.password);
+
     if (!passwordMatched) {
       throw new HttpException(
         {
@@ -143,10 +150,11 @@ export class AuthenticationsService {
         HttpStatus.BAD_REQUEST,
       );
     }
-    const payload = { sub: user._id, username: user.name };
-
+    const payload = { sub: user._id.toString(), username: user.name };
+    user.password = undefined;
     return {
-      access_token: await this.jwtService.signAsync(payload),
+      token: await this.jwtService.signAsync(payload),
+      user,
     };
   }
 
@@ -215,15 +223,101 @@ export class AuthenticationsService {
 
     return { message: 'Account is active' };
   }
-  forgotPassword() {
-    return '';
+  async forgotPassword({ email }: { email: string }) {
+    const user = await this.usersService.findByEmail(email);
+
+    const token = await this.createToken({ user, type: 'reset-password' });
+    await this.mail.sendMail({
+      options: {
+        to: user.email,
+        subject: 'Recuperação de senha',
+      },
+      template: {
+        path: 'forgot-password',
+        params: {
+          name: user.name,
+          url: `${process.env.URL_EMAIL_CONFIRMATION}?token=${token}`,
+        },
+      },
+    });
+    return { message: 'E-mail sent' };
   }
 
-  resetPassword(data: { token: string; password: string }) {
-    return '';
+  async rememberPassword({ token }: { token: string }) {
+    const tokenObject = await this.tokenModel
+      .findOne({
+        token,
+        type: 'reset-password',
+        isRevoked: false,
+      })
+      .exec();
+    if (!tokenObject) {
+      throw new HttpException(
+        {
+          status: HttpStatus.BAD_REQUEST,
+          error: 'Invalid token',
+        },
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+    if (tokenObject.isRevoked) {
+      throw new HttpException(
+        {
+          status: HttpStatus.BAD_REQUEST,
+          error: 'Expired token',
+        },
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+    return { message: 'Valid token' };
   }
+  async resetPassword({
+    token,
+    password,
+  }: {
+    token: string;
+    password: string;
+  }) {
+    const tokenObject = await this.tokenModel
+      .findOne({
+        token,
+        type: 'reset-password',
+      })
+      .exec();
+    if (!tokenObject) {
+      throw new HttpException(
+        {
+          status: HttpStatus.BAD_REQUEST,
+          error: 'Invalid token',
+        },
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+    if (tokenObject.isRevoked) {
+      throw new HttpException(
+        {
+          status: HttpStatus.BAD_REQUEST,
+          error: 'Expired token',
+        },
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+    const user = await this.usersService.findOne(tokenObject.userId.toString());
+    if (!user) {
+      throw new HttpException(
+        {
+          status: HttpStatus.BAD_REQUEST,
+          error: 'User not found',
+        },
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+    const _password = await hash(password, 8);
 
-  rememberPassword(token: string) {
-    return '';
+    user.password = _password;
+
+    await this.usersService.update(user._id.toString(), user);
+
+    return { message: 'Password updated' };
   }
 }

@@ -6,7 +6,8 @@ import { UsersModule } from '../users/users.module';
 import { AuthenticationsController } from './authentications.controller';
 import { AuthenticationsService } from './authentications.service';
 import { Token, TokenSchema } from './schemas/tokens.entity';
-
+import * as dotenv from 'dotenv';
+dotenv.config();
 @Module({
   imports: [
     MailModule,
