@@ -35,6 +35,7 @@ export class UsersService {
       );
     }
     const password = await hash(createUserDto.password, 8);
+
     createUserDto.password = password;
     const newUser = await this.userModel.create(createUserDto);
 
@@ -71,8 +72,8 @@ export class UsersService {
   async findAll(query: ExpressQuery): Promise<User[]> {
     let limitPage = Number(query.limit) || 10;
     limitPage = limitPage > 100 ? 100 : limitPage;
-    let currentPage = Number(query.page)|| 1
-    let skip = limitPage * (currentPage-1)
+    const currentPage = Number(query.page) || 1;
+    const skip = limitPage * (currentPage - 1);
     return this.userModel.find().limit(limitPage).skip(skip).exec();
   }
 
