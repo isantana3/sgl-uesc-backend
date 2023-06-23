@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './schemas/user.schemas';
@@ -19,20 +19,14 @@ export class UsersService {
     let currentPage = Number(query.page)|| 1
     let skip = limitPage * (currentPage-1)
 
-    const all_users = await this.userModel.find().exec()
+    const all_users = await this.userModel.find({ deleted_at: null }).exec()
     const lastPage = Math.ceil(all_users.length / limitPage);
 
 
-    const users = await this.userModel.find().limit(limitPage).skip(skip).exec();
+    const users = await this.userModel.find({ deleted_at: null }).limit(limitPage).skip(skip).exec();
 
     if (users.length == 0 && currentPage != 1){
-      throw new HttpException(
-        {
-          status: HttpStatus.NOT_FOUND,
-          error: 'Page Not Found',
-        },
-        HttpStatus.NOT_FOUND,
-      );
+      throw new NotFoundException('Page Not Found');
     }
 
     interface CustomResponse {
@@ -57,29 +51,36 @@ export class UsersService {
   }
 
   async findOne(id: string): Promise<User> {
-    const result = await this.userModel.findOne({ _id: id }).exec();
+    const result = await this.userModel.findOne({ _id: id, deleted_at: null }).exec();
     if (!result) {
-      throw new HttpException(
-        {
-          status: HttpStatus.BAD_REQUEST,
-          error: 'User Not Found',
-        },
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new NotFoundException('User Not Found');
     }
     return result;
   }
 
   async update(id: string, updateUserDto: UpdateUserDto): Promise<User> {
     await this.userModel.updateOne({ _id: id }, updateUserDto).exec();
-
+    const existingItem = await this.userModel.findOne({ _id: id, deleted_at: null }).exec();
+  
+    if (!existingItem) {
+      throw new NotFoundException('User Not Found');
+    }
+  
+    existingItem.set(updateUserDto);
+    await existingItem.save();
+  
     return this.findOne(id);
   }
 
   async remove(id: string): Promise<User> {
     const deletedItem = await this.userModel
-      .findByIdAndRemove({ _id: id })
+      .findOneAndUpdate({ _id: id, deleted_at: null }, { deleted_at: new Date() })
       .exec();
+  
+    if (!deletedItem) {
+      throw new NotFoundException('User Not Found');
+    }
+  
     return deletedItem;
   }
 }

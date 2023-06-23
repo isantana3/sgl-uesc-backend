@@ -22,18 +22,6 @@ import { AvailableRoomsDto } from './dto/available-rooms.dto';
 @Controller('reservations')
 export class ReservationsController {
   constructor(private readonly reservationsService: ReservationsService) {}
-  // Criação de reserva
-  // Atualização
-  // Visualização de todas as salas reservadas
-  // - # Por localização (pavilhão)
-  // - # Por sala
-  // - # Por dia, mostrar todas as salas disponíveis naquele dia
-  // - # Por dia e hora, mostrar todas as salas disponíveis naquele horário
-  // - # Admin -> Visualizar reservar por usuário
-  // Visualização de uma reserva
-  // Cancelar reserva
-  // - Só administrador e usuário que reservou pode reservar sala
-  // Verificar se possui reserva de uma sala em uma data específica
 
   @Post()
   @ApiResponse({
@@ -129,7 +117,7 @@ export class ReservationsController {
 
   @Delete(':id')
   @ApiResponse({
-    status: 200,
+    status: 204,
     description: 'Deleção de dado realizada com sucesso',
     type: ResponseReservationDto,
   })

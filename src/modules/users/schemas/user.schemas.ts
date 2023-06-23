@@ -28,6 +28,9 @@ export class User {
   @Prop({ required: true })
   role: TRole;
 
+  @Prop({ default: null })
+  deleted_at: Date;
+
   constructor(partial?: Partial<User>) {
     Object.assign(this, partial);
   }

@@ -39,6 +39,9 @@ export class Reservation {
 
   @Prop({ default: 'reserved', required: true })
   status: TStatus;
+
+  @Prop({ default: null })
+  deleted_at: Date;
 }
 
 export const ReservationSchema = SchemaFactory.createForClass(Reservation);
