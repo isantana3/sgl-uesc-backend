@@ -10,7 +10,7 @@ export class CreatePavilionDto {
   })
   label: string;
 
-  @IsOptional()
+  @IsNotEmpty({ message: 'description é obrigatório' })
   @IsString({ message: 'description deve ser do tipo string' })
   @ApiProperty({
     example: 'Pavilhão de Ciências Exatas localizado próximo a torre da UESC',

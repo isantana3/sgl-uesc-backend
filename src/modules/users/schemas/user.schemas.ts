@@ -1,17 +1,22 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { HydratedDocument } from 'mongoose';
+import mongoose, { HydratedDocument } from 'mongoose';
 
 export type UserDocument = HydratedDocument<User>;
 // Professor
 // Alguém do colegiado
 // Diretor de alguma coisa
 export type TRole = 'admin' | 'manager' | 'user';
-export type TOffice = 'professor' | 'student' | 'technician';
 
 @Schema({ timestamps: true })
 export class User {
+  @Prop({ default: new mongoose.Types.ObjectId() })
+  _id: string;
+
   @Prop({ required: true })
   name: string;
+
+  @Prop({ default: false })
+  isActive: boolean;
 
   @Prop({ required: true, unique: true })
   email: string;
@@ -23,7 +28,7 @@ export class User {
   registration: string; // Matrícula
 
   @Prop({ required: true })
-  office: TOffice; // Cargo
+  office: string; // Cargo
 
   @Prop({ required: true })
   role: TRole;
