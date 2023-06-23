@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateItemDto } from './dto/create-item.dto';
 import { UpdateItemDto } from './dto/update-item.dto';
 import { InjectModel } from '@nestjs/mongoose';
@@ -18,13 +18,7 @@ export class ItemsService {
     const roomExists = await this.roomsServices.findOne(room);
 
     if (!roomExists) {
-      throw new HttpException(
-        {
-          status: HttpStatus.BAD_REQUEST,
-          error: 'Room Not Found',
-        },
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new NotFoundException('Room Not Found');
     }
   }
   async create(createItemDto: CreateItemDto) {
@@ -50,12 +44,12 @@ export class ItemsService {
     let currentPage = Number(query.page)|| 1
     let skip = limitPage * (currentPage-1)
 
-    const all_items = await this.itemModel.find().exec();
+    const all_items = await this.itemModel.find({ deleted_at: null }).exec();
     const lastPage = Math.ceil(all_items.length / limitPage);
 
 
     const items = await this.itemModel
-      .find()
+      .find({ deleted_at: null })
       .populate({
         path: 'room',
         populate: {
@@ -68,13 +62,7 @@ export class ItemsService {
       .exec();
 
       if (items.length == 0 && currentPage != 1){
-        throw new HttpException(
-          {
-            status: HttpStatus.NOT_FOUND,
-            error: 'Page Not Found',
-          },
-          HttpStatus.NOT_FOUND,
-        );
+        throw new NotFoundException('Page Not Found');
       }
   
       interface CustomResponse {
@@ -100,7 +88,7 @@ export class ItemsService {
 
   async findOne(id: string): Promise<Item> {
     const result = await this.itemModel
-      .findOne({ _id: id })
+      .findOne({ _id: id,deleted_at: null})
       .populate({
         path: 'room',
         populate: {
@@ -110,31 +98,39 @@ export class ItemsService {
       })
       .exec();
     if (!result) {
-      throw new HttpException(
-        {
-          status: HttpStatus.BAD_REQUEST,
-          error: 'Item Not Found',
-        },
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new NotFoundException('Item Not Found');
     }
     return result;
   }
 
-  async update(id: string, updateRoomDto: UpdateItemDto): Promise<Item> {
-    if (updateRoomDto.room) {
-      await this.checkRoomExists(updateRoomDto.room);
+  async update(id: string, updateItemDto: UpdateItemDto): Promise<Item> {
+    const existingItem = await this.itemModel.findOne({ _id: id, deleted_at: null }).exec();
+  
+    if (!existingItem) {
+      throw new NotFoundException('Item Not Found');
     }
-
-    await this.itemModel.updateOne({ _id: id }, updateRoomDto).exec();
-
-    return this.findOne(id);
+  
+    if (updateItemDto.room) {
+      await this.checkRoomExists(updateItemDto.room);
+    }
+  
+    existingItem.set(updateItemDto);
+    await existingItem.save();
+  
+    return existingItem;
   }
+  
 
   async remove(id: string): Promise<Item> {
     const deletedItem = await this.itemModel
-      .findByIdAndRemove({ _id: id })
+      .findOneAndUpdate({ _id: id, deleted_at: null }, { deleted_at: new Date() })
       .exec();
+  
+    if (!deletedItem) {
+      throw new NotFoundException('Item Not Found');
+    }
+  
     return deletedItem;
   }
+  
 }
