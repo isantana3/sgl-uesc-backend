@@ -237,7 +237,7 @@ export class ReservationsService {
     updateReservationDto: UpdateReservationDto,
   ): Promise<Reservation> {
     await this.reservationModel
-      .updateOne({ _id: id }, updateReservationDto)
+      .updateOne({ _id: new mongo.ObjectId(id) }, updateReservationDto)
       .exec();
 
     return this.findOne(id);
@@ -245,7 +245,7 @@ export class ReservationsService {
 
   async remove(id: string): Promise<Reservation> {
     const deletedItem = await this.reservationModel
-      .findByIdAndRemove({ _id: id })
+      .findByIdAndRemove({ _id: new mongo.ObjectId(id) })
       .exec();
     return deletedItem;
   }
