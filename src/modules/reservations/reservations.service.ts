@@ -218,7 +218,7 @@ export class ReservationsService {
 
   async findOne(id: string): Promise<Reservation> {
     const result = await this.reservationModel
-      .findOne({ _id: id })
+      .findOne({ _id: new mongo.ObjectId(id) })
       .populate('responsible')
       .exec();
     if (!result) {
