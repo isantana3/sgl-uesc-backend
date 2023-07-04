@@ -143,11 +143,11 @@ export class ReservationsService {
     }
 
     if (filterDto.room) {
-      query.where({ room: filterDto.room });
+      query.where({ room: new mongo.ObjectId(filterDto.room) });
     }
 
     if (filterDto.responsible) {
-      query.where({ responsible: filterDto.responsible });
+      query.where({ responsible: new mongo.ObjectId(filterDto.responsible) });
     }
 
     if (filterDto.pavilion) {
