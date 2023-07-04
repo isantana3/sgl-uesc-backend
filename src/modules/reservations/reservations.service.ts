@@ -81,14 +81,14 @@ export class ReservationsService {
         },
         status: 'reserved',
       },
-      {
-        room,
-        'semester.endDate': {
-          $gt: startDate,
-          $lte: endDate,
-        },
-        status: 'reserved',
-      },
+      // {
+      //   room,
+      //   'semester.endDate': {
+      //     $gt: startDate,
+      //     $lte: endDate,
+      //   },
+      //   status: 'reserved',
+      // },
     ]);
 
     return reservations;
