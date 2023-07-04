@@ -15,14 +15,12 @@ export class AuthenticationsController {
 
   @Post()
   signUp(@Body() signUpUserDto: SignUpUserDto) {
-    const { email, password, name, office, registration } = signUpUserDto;
+    const { email, name, office, registration } = signUpUserDto;
     return this.authenticationsService.signUp({
       email,
-      password,
       name,
       office,
       registration,
-      role: 'user',
     });
   }
   @Post('login')
@@ -35,9 +33,10 @@ export class AuthenticationsController {
   }
   @Post('active-account')
   activeAccount(@Body() data: ActiveAccountDto) {
-    const { token } = data;
+    const { token, password } = data;
     return this.authenticationsService.activeAccount({
       token,
+      password,
     });
   }
   @Post('forgot-password')

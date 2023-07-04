@@ -5,6 +5,11 @@ import { User } from 'src/modules/users/schemas/user.schemas';
 
 export type ReservationDocument = HydratedDocument<Reservation>;
 export type TStatus = 'reserved' | 'cancelled' | 'finished';
+export interface ISemester {
+  startDate: Date;
+  endDate: Date;
+  type: 'weekly';
+}
 
 @Schema({ timestamps: true })
 export class Reservation {
@@ -39,6 +44,9 @@ export class Reservation {
 
   @Prop({ default: 'reserved', required: true })
   status: TStatus;
+
+  @Prop({ type: {} })
+  semester: ISemester;
 }
 
 export const ReservationSchema = SchemaFactory.createForClass(Reservation);

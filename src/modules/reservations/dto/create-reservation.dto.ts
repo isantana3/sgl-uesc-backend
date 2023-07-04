@@ -6,7 +6,7 @@ import {
   IsOptional,
   IsString,
 } from 'class-validator';
-import { TStatus } from '../schemas/reservation.schemas';
+import { ISemester, TStatus } from '../schemas/reservation.schemas';
 
 export class CreateReservationDto {
   @IsString({ message: 'O label deve ser do tipo string' })
@@ -83,4 +83,10 @@ export class CreateReservationDto {
     examples: ['reserved', 'cancelled', 'finished'],
   })
   status: TStatus;
+
+  @IsOptional()
+  @ApiProperty({
+    description: 'Indica se a reserva vai ser semestral ou não',
+  })
+  semester?: ISemester;
 }

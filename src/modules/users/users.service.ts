@@ -8,10 +8,10 @@ import {
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './schemas/user.schemas';
-import { Model } from 'mongoose';
+import mongoose, { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 import { Query as ExpressQuery } from 'express-serve-static-core';
-
+import { ObjectId } from 'mongoose';
 import { hash } from 'bcrypt';
 import { AuthenticationsService } from '../authentications/authentications.service';
 import { MailService } from '../mail/mail.service';
@@ -37,7 +37,10 @@ export class UsersService {
     const password = await hash(createUserDto.password, 8);
 
     createUserDto.password = password;
-    const newUser = await this.userModel.create(createUserDto);
+    const newUser = await this.userModel.create({
+      ...createUserDto,
+      _id: new mongoose.Types.ObjectId(),
+    });
 
     if (!newUser) {
       throw new HttpException(
@@ -115,7 +118,12 @@ export class UsersService {
   }
 
   async findOne(id: string): Promise<User> {
-    const result = await this.userModel.findOne({ _id: id }).exec();
+    const _id = new mongoose.Types.ObjectId(id);
+    console.log(_id);
+
+    const result = await this.userModel.findOne({ _id: _id }).exec();
+    console.log(result);
+
     if (!result) {
       throw new HttpException(
         {
@@ -125,7 +133,7 @@ export class UsersService {
         HttpStatus.BAD_REQUEST,
       );
     }
-    return result;
+    return result as any;
   }
   async findByEmail(
     email: string,
