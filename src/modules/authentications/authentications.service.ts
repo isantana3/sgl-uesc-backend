@@ -203,7 +203,6 @@ export class AuthenticationsService {
         { _id: _token._id },
         {
           isRevoked: true,
-          password: _password,
         },
       )
       .exec();
@@ -219,6 +218,7 @@ export class AuthenticationsService {
     }
     const user = await this.usersService.update(_token.userId.toString(), {
       isActive: true,
+      password: _password,
     });
 
     if (!user) {

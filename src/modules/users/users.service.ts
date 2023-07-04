@@ -34,8 +34,11 @@ export class UsersService {
         HttpStatus.BAD_REQUEST,
       );
     }
-    const password = await hash(createUserDto.password, 8);
-
+    const password = await hash(
+      createUserDto.password || createUserDto.email + 'new-user',
+      8,
+    );
+    if (!createUserDto.role) createUserDto.role = 'user';
     createUserDto.password = password;
     const newUser = await this.userModel.create({
       ...createUserDto,
@@ -119,10 +122,8 @@ export class UsersService {
 
   async findOne(id: string): Promise<User> {
     const _id = new mongoose.Types.ObjectId(id);
-    console.log(_id);
 
     const result = await this.userModel.findOne({ _id: _id }).exec();
-    console.log(result);
 
     if (!result) {
       throw new HttpException(
@@ -156,7 +157,8 @@ export class UsersService {
   }
 
   async update(id: string, updateUserDto: UpdateUserDto): Promise<User> {
-    await this.userModel.updateOne({ _id: id }, updateUserDto).exec();
+    const _id = new mongoose.Types.ObjectId(id);
+    await this.userModel.updateOne({ _id }, updateUserDto).exec();
 
     return this.findOne(id);
   }
