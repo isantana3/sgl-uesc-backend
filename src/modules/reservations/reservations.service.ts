@@ -72,7 +72,7 @@ export class ReservationsService {
         HttpStatus.BAD_REQUEST,
       );
     }
-    const reservations = await this.reservationModel.find([
+    const reservations = await this.reservationModel.find(
       {
         room,
         endDate: {
@@ -89,7 +89,7 @@ export class ReservationsService {
       //   },
       //   status: 'reserved',
       // },
-    ]);
+    );
 
     return reservations;
   }
