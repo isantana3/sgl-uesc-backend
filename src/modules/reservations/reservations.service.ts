@@ -324,6 +324,13 @@ export class ReservationsService {
     const result = await this.reservationModel
       .findOne({ _id: new mongo.ObjectId(id) })
       .populate('responsible')
+      .populate({
+        path: 'room',
+        populate: {
+          path: 'pavilion',
+          model: 'Pavilion',
+        },
+      })
       .exec();
     if (!result) {
       throw new HttpException(
@@ -334,7 +341,12 @@ export class ReservationsService {
         HttpStatus.BAD_REQUEST,
       );
     }
-    return result;
+    // Remover o campo "password" de "responsible"
+    const sanitizedResult = result.toJSON();
+    if (sanitizedResult.responsible) {
+      delete sanitizedResult.responsible.password;
+    }
+    return sanitizedResult;
   }
   async update(id: string, updateReservationDto: any): Promise<Reservation> {
     await this.reservationModel
