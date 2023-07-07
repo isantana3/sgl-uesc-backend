@@ -12,19 +12,21 @@ export class AvailableRoomsDto {
   @ApiProperty({ example: '643d998881fdb61d5d0b1868' })
   pavilion: string;
 
-  @IsNotEmpty({ message: 'A startDate é obrigatória' })
-  @IsDateString({}, { message: 'A startDate deve ser uma data válida' })
   @ApiProperty({
-    example: '2023-06-15T10:00:00.000Z',
-    description: 'Data e hora de início da reserva no formato ISO 8601',
+    example: '2023-06-15',
+    description: 'Data da reserva no formato YYYY-MM-DD',
   })
-  startDate: Date;
+  day: string;
 
-  @IsNotEmpty({ message: 'A endDate é obrigatória' })
-  @IsDateString({}, { message: 'A endDate deve ser uma data válida' })
   @ApiProperty({
-    example: '2023-06-15T12:00:00.000Z',
-    description: 'Data e hora de término da reserva no formato ISO 8601',
+    example: '17:00',
+    description: 'Hora início da reserva no formato HH-MM',
   })
-  endDate: Date;
+  startHour: string;
+
+  @ApiProperty({
+    example: '18:00',
+    description: 'Hora início da reserva no formato HH-MM',
+  })
+  endHour: string;
 }

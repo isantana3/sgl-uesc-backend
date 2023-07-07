@@ -9,8 +9,16 @@ import { CheckReservationDto } from './dto/check-reservation.dto';
 import { CreateReservationDto } from './dto/create-reservation.dto';
 import { FindReservationFilterDto } from './dto/find-reservations-filter-dto';
 import { UpdateReservationDto } from './dto/update-reservation.dto';
-import { Reservation } from './schemas/reservation.schemas';
-
+import { Reservation, TDayWeek } from './schemas/reservation.schemas';
+const dayWeekItens: TDayWeek[] = [
+  'sunday',
+  'monday',
+  'tuesday',
+  'wednesday',
+  'thursday',
+  'friday',
+  'saturday',
+];
 @Injectable()
 export class ReservationsService {
   constructor(
@@ -24,7 +32,7 @@ export class ReservationsService {
   async getAvailableRoom(
     availableRoomsDto: AvailableRoomsDto,
   ): Promise<Reservation[]> {
-    const { endDate, pavilion, startDate } = availableRoomsDto;
+    const { endHour, pavilion, startHour, day } = availableRoomsDto;
     const data: any = [];
     if (pavilion) {
       data.push({
@@ -43,9 +51,10 @@ export class ReservationsService {
             {
               $match: {
                 $expr: { $eq: ['$room', '$$roomId'] },
-                endDate: {
-                  $gte: new Date(startDate),
-                  $lte: new Date(endDate),
+                day: day,
+                endHour: {
+                  $gte: new Date(startHour),
+                  $lte: new Date(endHour),
                 },
               },
             },
@@ -59,11 +68,11 @@ export class ReservationsService {
     return reservations;
   }
   // Retorna as reversas da sala em um período de tempo
-  async checkReservation(
-    checkReservationDto: CheckReservationDto,
-  ): Promise<Reservation[]> {
-    const { endDate, room, startDate } = checkReservationDto;
-    if (endDate === startDate) {
+  async checkReservation(checkReservationDto: any): Promise<Reservation[]> {
+    const { day, room, startHour, endHour, semester, dayWeek } =
+      checkReservationDto;
+
+    if (endHour === startHour) {
       throw new HttpException(
         {
           status: HttpStatus.BAD_REQUEST,
@@ -72,34 +81,97 @@ export class ReservationsService {
         HttpStatus.BAD_REQUEST,
       );
     }
-    const reservations = await this.reservationModel.find(
-      {
-        room,
-        endDate: {
-          $gt: startDate,
-          $lte: endDate,
+    if (endHour < startHour) {
+      throw new HttpException(
+        {
+          status: HttpStatus.BAD_REQUEST,
+          error: 'End Data is less than start date',
         },
-        status: 'reserved',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+    console.log({
+      room,
+      endHour: {
+        $gt: startHour,
+        $lte: endHour,
       },
-      // {
-      //   room,
-      //   'semester.endDate': {
-      //     $gt: startDate,
-      //     $lte: endDate,
-      //   },
-      //   status: 'reserved',
-      // },
-    );
+      'semester.endDay': { $gt: day },
+      'semester.dayWeek': dayWeek,
+      status: 'reserved',
+    });
+    let querySemester = [];
+    let queryDaily = [];
+    if (semester) {
+      querySemester = [
+        {
+          // - Se um registro semestral for feito com um registro diário criado nesse dia ou nos dias
+          room,
+          day: { $gt: semester.startDay, $lte: semester.endDay },
+          dayWeek: semester.dayWeek,
+          endHour: {
+            $gt: startHour,
+            $lte: endHour,
+          },
+          status: 'reserved',
+        },
+        {
+          // - Se um registro semestral for feito nesse dia e horário
+          room,
+          endHour: {
+            $gt: startHour,
+            $lte: endHour,
+          },
+          'semester.startDay': {
+            $lte: semester.endDay,
+            $gte: semester.startDay,
+          },
+          'semester.endDay': {
+            $lte: semester.endDay,
+            $gte: semester.startDay,
+          },
+          'semester.dayWeek': semester.dayWeek,
+          status: 'reserved',
+        },
+      ];
+    }
+    if (dayWeek) {
+      queryDaily = [
+        {
+          // - Se um registro diário for feito no mesmo dia que outro diário
+          room,
+          day,
+          dayWeek: dayWeek,
+          endHour: {
+            $gt: startHour,
+            $lte: endHour,
+          },
+          status: 'reserved',
+        },
+        {
+          // - Se um registro diário for feito no dia e horário de uma reserva semestral OK
+          room,
+          endHour: {
+            $gt: startHour,
+            $lte: endHour,
+          },
+          'semester.endDay': { $gte: day },
+          'semester.startDay': { $lte: day },
+          'semester.dayWeek': dayWeek,
+          status: 'reserved',
+        },
+      ];
+    }
+
+    const reservations = await this.reservationModel.find({
+      $or: [...queryDaily, ...querySemester],
+    });
 
     return reservations;
   }
 
-  async create(
-    createReservationDto: CreateReservationDto,
-  ): Promise<Reservation> {
+  async create(createReservationDto: any): Promise<Reservation> {
     await this.roomsService.findOne(createReservationDto.room);
-    console.log(createReservationDto);
-
     const responsibleExists = await this.usersService.findOne(
       createReservationDto.responsible,
     );
@@ -112,10 +184,42 @@ export class ReservationsService {
         HttpStatus.BAD_REQUEST,
       );
     }
-    const reservations = await this.checkReservation({
-      endDate: createReservationDto.endDate,
+    const newReservation = new Reservation();
+    const endDate = new Date(createReservationDto.endDate);
+    const endHour = endDate.getUTCHours() * 100;
+    const endMinute = endDate.getUTCMinutes();
+    const endTime = endHour + endMinute;
+    newReservation.endHour = endTime;
+
+    const startDate = new Date(createReservationDto.startDate);
+    const startHour = startDate.getUTCHours() * 100;
+    const startMinute = startDate.getUTCMinutes();
+    const startTime = startHour + startMinute;
+    newReservation.startHour = startTime;
+
+    const day = startDate.toISOString().split('T')[0];
+
+    const dayNumber = parseInt(day.split('-').join(''));
+    newReservation.dayWeek = dayWeekItens[startDate.getDay()];
+    newReservation.day = dayNumber;
+
+    Object.assign(newReservation, {
       room: createReservationDto.room,
-      startDate: createReservationDto.startDate,
+      responsible: createReservationDto.responsible,
+      label: createReservationDto.label,
+      status: createReservationDto.status,
+      previousObservation: createReservationDto.previousObservation,
+      laterObservation: createReservationDto.laterObservation,
+      semester: createReservationDto.semester,
+    });
+
+    const reservations = await this.checkReservation({
+      day: dayNumber,
+      startHour: startTime,
+      endHour: endTime,
+      room: createReservationDto.room,
+      semester: createReservationDto.semester,
+      dayWeek: newReservation.dayWeek,
     });
 
     if (reservations.length > 0) {
@@ -128,18 +232,18 @@ export class ReservationsService {
       );
     }
 
-    return await this.reservationModel.create(createReservationDto);
+    return await this.reservationModel.create(newReservation);
   }
 
   async findAll(filterDto?: FindReservationFilterDto): Promise<any> {
     const query = this.reservationModel.find();
 
-    if (filterDto.startDate) {
-      query.where({ startDate: { $gte: filterDto.startDate } });
+    if (filterDto.startHour) {
+      query.where({ startHour: { $gte: filterDto.startHour } });
     }
 
-    if (filterDto.endDate) {
-      query.where({ endDate: { $lt: filterDto.endDate } });
+    if (filterDto.endHour) {
+      query.where({ endHour: { $lt: filterDto.endHour } });
     }
 
     if (filterDto.room) {
@@ -232,10 +336,7 @@ export class ReservationsService {
     }
     return result;
   }
-  async update(
-    id: string,
-    updateReservationDto: UpdateReservationDto,
-  ): Promise<Reservation> {
+  async update(id: string, updateReservationDto: any): Promise<Reservation> {
     await this.reservationModel
       .updateOne({ _id: new mongo.ObjectId(id) }, updateReservationDto)
       .exec();

@@ -1,16 +1,14 @@
-import { IsDateString, IsNumberString, IsOptional, IsString } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { IsNumberString, IsOptional, IsString } from 'class-validator';
 
 export class FindReservationFilterDto {
   @IsOptional()
-  @IsDateString()
   @ApiProperty({ examples: ['2022-03-01', '2022-03-01T18:00:00.000Z'] })
-  startDate?: string;
-  
+  startHour?: string;
+
   @IsOptional()
-  @IsDateString()
   @ApiProperty({ examples: ['2022-03-01', '2022-03-01T18:00:00.000Z'] })
-  endDate?: string;
+  endHour?: string;
 
   @IsOptional()
   @IsString({ message: 'room deve ser do tipo string' })
@@ -26,7 +24,7 @@ export class FindReservationFilterDto {
   @IsOptional()
   @ApiProperty({ example: '643d998881fdb61d5d0b1868' })
   pavilion: string;
-  
+
   @IsOptional()
   @IsNumberString()
   limit?: string;
