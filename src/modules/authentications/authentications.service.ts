@@ -13,7 +13,7 @@ import { SignUpUserDto } from './dto/sign-up-user.dto';
 import { MailService } from '../mail/mail.service';
 import { InjectModel } from '@nestjs/mongoose';
 import { Token } from './schemas/tokens.entity';
-import { Model } from 'mongoose';
+import mongoose, { Model } from 'mongoose';
 import { User } from '../users/schemas/user.schemas';
 import time from 'src/utils/time';
 @Injectable()
@@ -56,6 +56,8 @@ export class AuthenticationsService {
         isRevoked,
         tokenExpiration,
         userId: user._id,
+        _id: new mongoose.Types.ObjectId(),
+
       });
     } else {
       newToken = await this.tokenModel
@@ -158,7 +160,14 @@ export class AuthenticationsService {
     };
   }
 
-  async activeAccount({ token }: { token: string }) {
+  async activeAccount({
+    token,
+    password,
+  }: {
+    token: string;
+    password: string;
+  }) {
+
     const _token = await this.tokenModel.findOne({ token: token }).exec();
 
     if (!_token || _token.isRevoked || _token.type !== 'email-verification') {
@@ -189,6 +198,7 @@ export class AuthenticationsService {
         HttpStatus.BAD_REQUEST,
       );
     }
+    const _password = await hash(password, 8);
     const newToken = await this.tokenModel
       .updateOne(
         { _id: _token._id },
@@ -209,6 +219,7 @@ export class AuthenticationsService {
     }
     const user = await this.usersService.update(_token.userId.toString(), {
       isActive: true,
+      password: _password,
     });
 
     if (!user) {

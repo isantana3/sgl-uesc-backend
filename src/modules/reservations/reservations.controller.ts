@@ -39,6 +39,7 @@ export class ReservationsController {
       room,
       startDate,
       status,
+      semester,
     } = createReservationDto;
     return this.reservationsService.create({
       endDate,
@@ -49,6 +50,7 @@ export class ReservationsController {
       room,
       startDate,
       status,
+      semester,
     });
   }
   @Get('/available-rooms')

@@ -72,12 +72,16 @@ export class ReservationsService {
         HttpStatus.BAD_REQUEST,
       );
     }
-    const reservations = await this.reservationModel.find({
-      room,
-      endDate: {
-        $gt: startDate,
-        $lte: endDate,
+    const reservations = await this.reservationModel.find([
+      {
+        room,
+        endDate: {
+          $gt: startDate,
+          $lte: endDate,
+        },
+        status: 'reserved',
       },
+
       deleted_at: null,
     });
 
@@ -88,6 +92,8 @@ export class ReservationsService {
     createReservationDto: CreateReservationDto,
   ): Promise<Reservation> {
     await this.roomsService.findOne(createReservationDto.room);
+    console.log(createReservationDto);
+
     const responsibleExists = await this.usersService.findOne(
       createReservationDto.responsible,
     );
@@ -119,8 +125,9 @@ export class ReservationsService {
     return await this.reservationModel.create(createReservationDto);
   }
 
-  async findAll(filterDto?: FindReservationFilterDto): Promise<Object> {
-    const query = this.reservationModel.find({ deleted_at: null });
+
+  async findAll(filterDto?: FindReservationFilterDto): Promise<any> {
+    const query = this.reservationModel.find();
 
     if (filterDto.startDate) {
       query.where({ startDate: { $gte: filterDto.startDate } });
@@ -129,15 +136,15 @@ export class ReservationsService {
     if (filterDto.endDate) {
       query.where({ endDate: { $lt: filterDto.endDate } });
     }
-    
+
     if (filterDto.room) {
       query.where({ room: filterDto.room });
     }
-    
+
     if (filterDto.responsible) {
       query.where({ responsible: filterDto.responsible });
     }
-    
+
     if (filterDto.pavilion) {
       query.populate('responsible').populate({
         path: 'room',
@@ -147,9 +154,7 @@ export class ReservationsService {
           match: { _id: filterDto.pavilion },
         },
       });
-    }
-    else{
-
+    } else {
       query.populate('responsible').populate({
         path: 'room',
         populate: {
@@ -160,22 +165,31 @@ export class ReservationsService {
     }
 
     const secondaryQuery = query.clone();
-    const all_reservations = await secondaryQuery.exec()
+    const all_reservations = await secondaryQuery.exec();
 
     let limitPage = Number(filterDto.limit) || 10;
     limitPage = limitPage > 100 ? 100 : limitPage;
-    let currentPage = Number(filterDto.page)|| 1
-    let skip = limitPage * (currentPage-1)
-    
+    const currentPage = Number(filterDto.page) || 1;
+    const skip = limitPage * (currentPage - 1);
+
     const lastPage = Math.ceil(all_reservations.length / limitPage);
 
-    query.limit(limitPage).skip(skip)
+    query.limit(limitPage).skip(skip);
 
     const unfiltered_reservations = await query.exec();
-    const reservations = unfiltered_reservations.filter((reservation) => reservation.room && reservation.room.pavilion);
+    const reservations = unfiltered_reservations.filter(
+      (reservation) => reservation.room && reservation.room.pavilion,
+    );
 
-    if (reservations.length == 0 && currentPage != 1){
-      throw new NotFoundException('Page Not Found');
+
+    if (reservations.length == 0 && currentPage != 1) {
+      throw new HttpException(
+        {
+          status: HttpStatus.NOT_FOUND,
+          error: 'Page Not Found',
+        },
+        HttpStatus.NOT_FOUND,
+      );
     }
 
     interface CustomResponse {
@@ -186,7 +200,7 @@ export class ReservationsService {
         data: Reservation[];
       };
     }
-    
+
     const response: CustomResponse = {
       status: 200,
       data: {
@@ -213,7 +227,12 @@ export class ReservationsService {
     if (!result) {
       throw new NotFoundException('Revation Not Found');
     }
-    return result;
+    // Remover o campo "password" de "responsible"
+    const sanitizedResult = result.toJSON();
+    if (sanitizedResult.responsible) {
+      delete sanitizedResult.responsible.password;
+    }
+    return sanitizedResult;
   }
   async update(
     id: string,

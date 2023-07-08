@@ -5,13 +5,16 @@ import {
   Injectable,
   forwardRef,
   NotFoundException
+
 } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './schemas/user.schemas';
-import { Model } from 'mongoose';
+import mongoose, { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 import { Query as ExpressQuery } from 'express-serve-static-core';
+
+import { ObjectId } from 'mongoose';
 
 import { hash } from 'bcrypt';
 import { AuthenticationsService } from '../authentications/authentications.service';
@@ -35,10 +38,18 @@ export class UsersService {
         HttpStatus.BAD_REQUEST,
       );
     }
-    const password = await hash(createUserDto.password, 8);
 
+    const password = await hash(
+      createUserDto.password || createUserDto.email + 'new-user',
+      8,
+    );
+    if (!createUserDto.role) createUserDto.role = 'user';
     createUserDto.password = password;
-    const newUser = await this.userModel.create(createUserDto);
+    const newUser = await this.userModel.create({
+      ...createUserDto,
+      _id: new mongoose.Types.ObjectId(),
+    });
+
 
     if (!newUser) {
       throw new HttpException(
@@ -70,20 +81,35 @@ export class UsersService {
     return newUser;
   }
 
-  async findAll(query: ExpressQuery): Promise<Object> {
+  async findAll(query: ExpressQuery): Promise<any> {
     let limitPage = Number(query.limit) || 10;
     limitPage = limitPage > 100 ? 100 : limitPage;
-    let currentPage = Number(query.page)|| 1
-    let skip = limitPage * (currentPage-1)
+    const currentPage = Number(query.page) || 1;
+    const skip = limitPage * (currentPage - 1);
+
 
     const all_users = await this.userModel.find({ deleted_at: null }).exec()
+
     const lastPage = Math.ceil(all_users.length / limitPage);
+
+    const users = await this.userModel
+      .find()
+      .limit(limitPage)
+      .skip(skip)
+      .exec();
 
 
     const users = await this.userModel.find({ deleted_at: null }).limit(limitPage).skip(skip).exec();
 
-    if (users.length == 0 && currentPage != 1){
-      throw new NotFoundException('Page Not Found');
+    
+    if (users.length == 0 && currentPage != 1) {
+      throw new HttpException(
+        {
+          status: HttpStatus.NOT_FOUND,
+          error: 'Page Not Found',
+        },
+        HttpStatus.NOT_FOUND,
+      );
     }
 
     interface CustomResponse {
@@ -94,25 +120,26 @@ export class UsersService {
         data: User[];
       };
     }
-    
+
     const response: CustomResponse = {
       status: 200,
       data: {
-        currentPage: currentPage ,
-        lastPage: lastPage ,
+        currentPage: currentPage,
+        lastPage: lastPage,
         data: users,
       },
     };
     return response;
-
   }
 
   async findOne(id: string): Promise<User> {
+    const _id = new mongoose.Types.ObjectId(id);
     const result = await this.userModel.findOne({ _id: id, deleted_at: null }).exec();
     if (!result) {
       throw new NotFoundException('User Not Found');
     }
-    return result;
+    return result as any;
+
   }
   async findByEmail(
     email: string,
@@ -135,6 +162,8 @@ export class UsersService {
   }
 
   async update(id: string, updateUserDto: UpdateUserDto): Promise<User> {
+
+const _id = new mongoose.Types.ObjectId(id);
     await this.userModel.updateOne({ _id: id }, updateUserDto).exec();
     const existingItem = await this.userModel.findOne({ _id: id, deleted_at: null }).exec();
   
@@ -145,6 +174,7 @@ export class UsersService {
     existingItem.set(updateUserDto);
     await existingItem.save();
   
+
     return this.findOne(id);
   }
 

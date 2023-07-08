@@ -6,7 +6,7 @@ export type TokenDocument = HydratedDocument<Token>;
 @Schema({ timestamps: true })
 export class Token {
   @Prop({ default: new mongoose.Types.ObjectId() })
-  _id: string;
+  _id: mongoose.Types.ObjectId;
 
   @Prop({
     required: true,

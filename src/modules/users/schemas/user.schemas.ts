@@ -10,7 +10,8 @@ export type TRole = 'admin' | 'manager' | 'user';
 @Schema({ timestamps: true })
 export class User {
   @Prop({ default: new mongoose.Types.ObjectId() })
-  _id: string;
+  _id: mongoose.Types.ObjectId;
+
 
   @Prop({ required: true })
   name: string;

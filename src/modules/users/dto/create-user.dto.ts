@@ -30,7 +30,7 @@ export class CreateUserDto {
   @IsNotEmpty({ message: 'password é obrigatório' })
   @ApiProperty({ example: '12345678' })
   @Exclude({ toPlainOnly: true })
-  password: string;
+  password?: string;
 
   @IsNotEmpty({ message: 'registration é obrigatório' })
   @ApiProperty({
@@ -54,7 +54,8 @@ export class CreateUserDto {
     examples: ['admin', 'manager', 'user'],
   })
   @IsEnum(['admin', 'manager', 'user'])
-  role: TRole;
+  role?: TRole;
+
 
   isActive?: boolean;
 }
