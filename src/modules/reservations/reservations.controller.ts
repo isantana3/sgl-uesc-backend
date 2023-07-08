@@ -92,6 +92,17 @@ export class ReservationsController {
   findAll(@Query() filterDto: FindReservationFilterDto) {
     return this.reservationsService.findAll(filterDto);
   }
+
+  @Get('/semester')
+  @ApiResponse({
+    status: 200,
+    description: 'Dados listados com sucesso',
+    isArray: true,
+    type: ResponseReservationDto,
+  })
+  findAllSemester(@Query() filterDto: FindReservationFilterDto) {
+    return this.reservationsService.findAllSemester(filterDto);
+  }
   @Get(':id')
   @ApiResponse({
     status: 200,

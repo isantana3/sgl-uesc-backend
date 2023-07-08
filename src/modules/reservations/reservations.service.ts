@@ -236,7 +236,11 @@ export class ReservationsService {
   }
 
   async findAll(filterDto?: FindReservationFilterDto): Promise<any> {
-    const query = this.reservationModel.find();
+    const query = this.reservationModel.find({
+      semester: {
+        $exists: false,
+      },
+    });
 
     if (filterDto.startHour) {
       query.where({ startHour: { $gte: filterDto.startHour } });
@@ -319,7 +323,94 @@ export class ReservationsService {
     };
     return response;
   }
+  async findAllSemester(filterDto?: FindReservationFilterDto): Promise<any> {
+    const query = this.reservationModel.find().where({
+      semester: {
+        $exists: true,
+      },
+    });
 
+    if (filterDto.startHour) {
+      query.where({ startHour: { $gte: filterDto.startHour } });
+    }
+
+    if (filterDto.endHour) {
+      query.where({ endHour: { $lt: filterDto.endHour } });
+    }
+
+    if (filterDto.room) {
+      query.where({ room: new mongo.ObjectId(filterDto.room) });
+    }
+
+    if (filterDto.responsible) {
+      query.where({ responsible: new mongo.ObjectId(filterDto.responsible) });
+    }
+
+    if (filterDto.pavilion) {
+      query.populate('responsible').populate({
+        path: 'room',
+        populate: {
+          path: 'pavilion',
+          model: 'Pavilion',
+          match: { _id: filterDto.pavilion },
+        },
+      });
+    } else {
+      query.populate('responsible').populate({
+        path: 'room',
+        populate: {
+          path: 'pavilion',
+          model: 'Pavilion',
+        },
+      });
+    }
+
+    const secondaryQuery = query.clone();
+    const all_reservations = await secondaryQuery.exec();
+
+    let limitPage = Number(filterDto.limit) || 10;
+    limitPage = limitPage > 100 ? 100 : limitPage;
+    const currentPage = Number(filterDto.page) || 1;
+    const skip = limitPage * (currentPage - 1);
+
+    const lastPage = Math.ceil(all_reservations.length / limitPage);
+
+    query.limit(limitPage).skip(skip);
+
+    const unfiltered_reservations = await query.exec();
+    const reservations = unfiltered_reservations.filter(
+      (reservation) => reservation.room && reservation.room.pavilion,
+    );
+
+    if (reservations.length == 0 && currentPage != 1) {
+      throw new HttpException(
+        {
+          status: HttpStatus.NOT_FOUND,
+          error: 'Page Not Found',
+        },
+        HttpStatus.NOT_FOUND,
+      );
+    }
+
+    interface CustomResponse {
+      status: number;
+      data: {
+        currentPage: number;
+        lastPage: number | null;
+        data: Reservation[];
+      };
+    }
+
+    const response: CustomResponse = {
+      status: 200,
+      data: {
+        currentPage: currentPage,
+        lastPage: lastPage,
+        data: reservations,
+      },
+    };
+    return response;
+  }
   async findOne(id: string): Promise<Reservation> {
     const result = await this.reservationModel
       .findOne({ _id: new mongo.ObjectId(id) })
