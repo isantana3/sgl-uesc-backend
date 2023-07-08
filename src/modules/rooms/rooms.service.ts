@@ -1,7 +1,7 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { PavilionsService } from 'src/modules/pavilions/pavilions.service';
+import { PavilionsService } from '../pavilions/pavilions.service';
 import { CreateRoomDto } from './dto/create-room.dto';
 import { UpdateRoomDto } from './dto/update-room.dto';
 import { Room } from './schemas/room.schemas';
@@ -48,18 +48,12 @@ export class RoomsService {
     let currentPage = Number(query.page)|| 1;
     let skip = limitPage * (currentPage-1);
 
-    const all_rooms =  await this.roomModel.find().populate('pavilion');
+    const all_rooms =  await this.roomModel.find({ deleted_at: null }).populate('pavilion');
     const lastPage = Math.ceil(all_rooms.length / limitPage);
 
-    const rooms = await this.roomModel.find().populate('pavilion').limit(limitPage).skip(skip).exec();
+    const rooms = await this.roomModel.find({ deleted_at: null }).populate('pavilion').limit(limitPage).skip(skip).exec();
     if (rooms.length == 0 && currentPage != 1){
-      throw new HttpException(
-        {
-          status: HttpStatus.NOT_FOUND,
-          error: 'Page Not Found',
-        },
-        HttpStatus.NOT_FOUND,
-      );
+      throw new NotFoundException('Page Not Found');
     }
 
     interface CustomResponse {
@@ -86,30 +80,36 @@ export class RoomsService {
 
   async findOne(id: string): Promise<Room> {
     const result = await this.roomModel
-      .findOne({ _id: id })
+      .findOne({ _id: id,  deleted_at: null })
       .populate('pavilion')
       .exec();
     if (!result) {
-      throw new HttpException(
-        {
-          status: HttpStatus.BAD_REQUEST,
-          error: 'Room Not Found',
-        },
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new NotFoundException('Room Not Found');
     }
     return result;
   }
   async update(id: string, updateRoomDto: UpdateRoomDto): Promise<Room> {
-    await this.roomModel.updateOne({ _id: id }, updateRoomDto).exec();
-
+    const existingItem = await this.roomModel.findOne({ _id: id, deleted_at: null }).exec();
+    
+    if (!existingItem) {
+      throw new NotFoundException('Room Not Found');
+    }
+    
+    existingItem.set(updateRoomDto);
+    await existingItem.save();
+    
     return this.findOne(id);
   }
 
   async remove(id: string): Promise<Room> {
     const deletedItem = await this.roomModel
-      .findByIdAndRemove({ _id: id })
+      .findOneAndUpdate({ _id: id, deleted_at: null }, { deleted_at: new Date() })
       .exec();
+  
+    if (!deletedItem) {
+      throw new NotFoundException('Room Not Found');
+    }
+  
     return deletedItem;
   }
 }

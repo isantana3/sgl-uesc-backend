@@ -15,7 +15,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Token } from './schemas/tokens.entity';
 import mongoose, { Model } from 'mongoose';
 import { User } from '../users/schemas/user.schemas';
-import time from 'src/utils/time';
+import time from '../../utils/time';
 @Injectable()
 export class AuthenticationsService {
   constructor(
@@ -57,6 +57,7 @@ export class AuthenticationsService {
         tokenExpiration,
         userId: user._id,
         _id: new mongoose.Types.ObjectId(),
+
       });
     } else {
       newToken = await this.tokenModel
@@ -166,6 +167,7 @@ export class AuthenticationsService {
     token: string;
     password: string;
   }) {
+
     const _token = await this.tokenModel.findOne({ token: token }).exec();
 
     if (!_token || _token.isRevoked || _token.type !== 'email-verification') {
@@ -197,7 +199,6 @@ export class AuthenticationsService {
       );
     }
     const _password = await hash(password, 8);
-
     const newToken = await this.tokenModel
       .updateOne(
         { _id: _token._id },

@@ -4,17 +4,18 @@ import {
   Inject,
   Injectable,
   forwardRef,
+  NotFoundException
+
 } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { User } from './schemas/user.schemas';
 import mongoose, { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 import { Query as ExpressQuery } from 'express-serve-static-core';
-import { ObjectId } from 'mongoose';
 import { hash } from 'bcrypt';
 import { AuthenticationsService } from '../authentications/authentications.service';
 import { MailService } from '../mail/mail.service';
+import { User } from './schemas/user.schemas';
 @Injectable()
 export class UsersService {
   constructor(
@@ -34,6 +35,7 @@ export class UsersService {
         HttpStatus.BAD_REQUEST,
       );
     }
+
     const password = await hash(
       createUserDto.password || createUserDto.email + 'new-user',
       8,
@@ -44,6 +46,7 @@ export class UsersService {
       ...createUserDto,
       _id: new mongoose.Types.ObjectId(),
     });
+
 
     if (!newUser) {
       throw new HttpException(
@@ -81,7 +84,9 @@ export class UsersService {
     const currentPage = Number(query.page) || 1;
     const skip = limitPage * (currentPage - 1);
 
-    const all_users = await this.userModel.find().exec();
+
+    const all_users = await this.userModel.find({ deleted_at: null }).exec()
+
     const lastPage = Math.ceil(all_users.length / limitPage);
 
     const users = await this.userModel
@@ -90,6 +95,10 @@ export class UsersService {
       .skip(skip)
       .exec();
 
+
+    const users = await this.userModel.find({ deleted_at: null }).limit(limitPage).skip(skip).exec();
+
+    
     if (users.length == 0 && currentPage != 1) {
       throw new HttpException(
         {
@@ -122,19 +131,12 @@ export class UsersService {
 
   async findOne(id: string): Promise<User> {
     const _id = new mongoose.Types.ObjectId(id);
-
-    const result = await this.userModel.findOne({ _id: _id }).exec();
-
+    const result = await this.userModel.findOne({ _id: id, deleted_at: null }).exec();
     if (!result) {
-      throw new HttpException(
-        {
-          status: HttpStatus.BAD_REQUEST,
-          error: 'User Not Found',
-        },
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new NotFoundException('User Not Found');
     }
     return result as any;
+
   }
   async findByEmail(
     email: string,
@@ -157,16 +159,31 @@ export class UsersService {
   }
 
   async update(id: string, updateUserDto: UpdateUserDto): Promise<User> {
-    const _id = new mongoose.Types.ObjectId(id);
-    await this.userModel.updateOne({ _id }, updateUserDto).exec();
+
+const _id = new mongoose.Types.ObjectId(id);
+    await this.userModel.updateOne({ _id: id }, updateUserDto).exec();
+    const existingItem = await this.userModel.findOne({ _id: id, deleted_at: null }).exec();
+  
+    if (!existingItem) {
+      throw new NotFoundException('User Not Found');
+    }
+  
+    existingItem.set(updateUserDto);
+    await existingItem.save();
+  
 
     return this.findOne(id);
   }
 
   async remove(id: string): Promise<User> {
     const deletedItem = await this.userModel
-      .findByIdAndRemove({ _id: id })
+      .findOneAndUpdate({ _id: id, deleted_at: null }, { deleted_at: new Date() })
       .exec();
+  
+    if (!deletedItem) {
+      throw new NotFoundException('User Not Found');
+    }
+  
     return deletedItem;
   }
 }
