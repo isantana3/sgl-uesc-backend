@@ -19,6 +19,41 @@ const dayWeekItens: TDayWeek[] = [
   'friday',
   'saturday',
 ];
+
+const convertReservation = (reservation: any) => {
+  const dayString = reservation.day.toString();
+  const dayFormatted = `${dayString.slice(0, 4)}-${dayString.slice(
+    4,
+    6,
+  )}-${dayString.slice(6, 8)}`;
+  const startHourString =
+    reservation.startHour >= 1000
+      ? reservation.startHour.toString()
+      : '0' + reservation.startHour.toString();
+  const startHourFormatted = `${startHourString.slice(
+    0,
+    2,
+  )}:${startHourString.slice(2, 4)}:00`;
+  const endHourString =
+    reservation.endHour >= 1000
+      ? reservation.endHour.toString()
+      : '0' + reservation.endHour.toString();
+  const endHourFormatted = `${endHourString.slice(0, 2)}:${endHourString.slice(
+    2,
+    4,
+  )}:00`;
+  const startDateString = `${dayFormatted}T${startHourFormatted}.000Z`;
+  const startDate = new Date(startDateString);
+  const endDateString = `${dayFormatted}T${endHourFormatted}.000Z`;
+  const endDate = new Date(endDateString);
+
+  return {
+    ...reservation,
+    startDate,
+    endDate,
+  };
+};
+
 @Injectable()
 export class ReservationsService {
   constructor(
@@ -90,16 +125,7 @@ export class ReservationsService {
         HttpStatus.BAD_REQUEST,
       );
     }
-    console.log({
-      room,
-      endHour: {
-        $gt: startHour,
-        $lte: endHour,
-      },
-      'semester.endDay': { $gt: day },
-      'semester.dayWeek': dayWeek,
-      status: 'reserved',
-    });
+
     let querySemester = [];
     let queryDaily = [];
     if (semester) {
@@ -197,7 +223,7 @@ export class ReservationsService {
     const startTime = startHour + startMinute;
     newReservation.startHour = startTime;
 
-    const day = startDate.toISOString().split('T')[0];
+    const day = startDate.toString().split('T')[0];
 
     const dayNumber = parseInt(day.split('-').join(''));
     newReservation.dayWeek = dayWeekItens[startDate.getDay()];
@@ -312,15 +338,18 @@ export class ReservationsService {
         data: Reservation[];
       };
     }
-
+    const reservationsFormatted: any = reservations.map((reservation) => {
+      return convertReservation(reservation.toJSON());
+    });
     const response: CustomResponse = {
       status: 200,
       data: {
         currentPage: currentPage,
         lastPage: lastPage,
-        data: reservations,
+        data: reservationsFormatted,
       },
     };
+
     return response;
   }
   async findAllSemester(filterDto?: FindReservationFilterDto): Promise<any> {
