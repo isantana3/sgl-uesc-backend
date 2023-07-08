@@ -57,8 +57,6 @@ export class CreateReservationDto {
   @ApiProperty({ example: '643d998881fdb61d5d0b1868' })
   room: string;
 
-  @IsNotEmpty({ message: 'A startDate é obrigatória' })
-  @IsDateString({}, { message: 'A startDate deve ser uma data válida' })
   @ApiProperty({
     example: '2023-06-15T10:00:00.000Z',
     description: 'Data e hora de início da reserva no formato ISO 8601',
@@ -66,7 +64,6 @@ export class CreateReservationDto {
   startDate: Date;
 
   @IsNotEmpty({ message: 'A data de término é obrigatória' })
-  @IsDateString({}, { message: 'A data de término deve ser uma data válida' })
   @ApiProperty({
     example: '2023-06-15T12:00:00.000Z',
     description: 'Data e hora de término da reserva no formato ISO 8601',

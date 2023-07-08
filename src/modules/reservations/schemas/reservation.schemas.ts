@@ -5,10 +5,19 @@ import { User } from 'src/modules/users/schemas/user.schemas';
 
 export type ReservationDocument = HydratedDocument<Reservation>;
 export type TStatus = 'reserved' | 'cancelled' | 'finished';
+export type TDayWeek =
+  | 'monday'
+  | 'tuesday'
+  | 'wednesday'
+  | 'thursday'
+  | 'friday'
+  | 'saturday'
+  | 'sunday';
 export interface ISemester {
-  startDate: Date;
-  endDate: Date;
-  type: 'weekly';
+  startDay: string;
+  endDay: string;
+  dayWeek: TDayWeek;
+  type: 'weekly' | 'month';
 }
 
 @Schema({ timestamps: true })
@@ -36,11 +45,17 @@ export class Reservation {
   })
   room: Room;
 
-  @Prop({ required: true })
-  startDate: Date;
+  @Prop({})
+  day: number;
+
+  @Prop({})
+  dayWeek: TDayWeek;
 
   @Prop({ required: true })
-  endDate: Date;
+  endHour: number;
+
+  @Prop({ required: true })
+  startHour: number;
 
   @Prop({ default: 'reserved', required: true })
   status: TStatus;
