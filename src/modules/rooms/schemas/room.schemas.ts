@@ -18,6 +18,9 @@ export class Room {
   @Expose({ name: 'pavilion' })
   pavilion: Pavilion;
 
+  @Prop({ default: null })
+  deleted_at: Date;
+
   constructor(partial?: Partial<Room>) {
     Object.assign(this, partial);
   }

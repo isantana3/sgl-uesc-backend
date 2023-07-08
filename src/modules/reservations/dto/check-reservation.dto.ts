@@ -1,5 +1,11 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsDateString, IsNotEmpty, IsString } from 'class-validator';
+import {
+  IsDateString,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+} from 'class-validator';
+import { ISemester, TDayWeek } from '../schemas/reservation.schemas';
 
 export class CheckReservationDto {
   @IsString({ message: 'room deve ser do tipo string' })
@@ -7,19 +13,36 @@ export class CheckReservationDto {
   @ApiProperty({ example: '643d998881fdb61d5d0b1868' })
   room: string;
 
-  @IsNotEmpty({ message: 'A startDate é obrigatória' })
-  @IsDateString({}, { message: 'A startDate deve ser uma data válida' })
+  @IsNotEmpty({ message: 'A day é obrigatória' })
   @ApiProperty({
-    example: '2023-06-15T10:00:00.000Z',
-    description: 'Data e hora de início da reserva no formato ISO 8601',
+    example: '2023-06-15',
+    description: 'Data da reserva no formato YYYY-MM-DD',
   })
-  startDate: Date;
+  day: string;
 
-  @IsNotEmpty({ message: 'A data de término é obrigatória' })
-  @IsDateString({}, { message: 'A data de término deve ser uma data válida' })
+  @IsNotEmpty({ message: 'A startHour é obrigatória' })
   @ApiProperty({
-    example: '2023-06-15T12:00:00.000Z',
-    description: 'Data e hora de término da reserva no formato ISO 8601',
+    example: '17:00',
+    description: 'Hora início da reserva no formato HH-MM',
   })
-  endDate: Date;
+  startHour: string;
+
+  @IsNotEmpty({ message: 'A endHour é obrigatória' })
+  @ApiProperty({
+    example: '18:00',
+    description: 'Hora início da reserva no formato HH-MM',
+  })
+  endHour: string;
+
+  @IsOptional()
+  @ApiProperty({
+    description: 'Indica se a reserva vai ser semestral ou não',
+  })
+  semester?: ISemester;
+
+  @IsOptional()
+  @ApiProperty({
+    description: 'Dia da semana',
+  })
+  dayWeek?: TDayWeek;
 }

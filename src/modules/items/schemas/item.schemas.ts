@@ -23,5 +23,8 @@ export class Item {
 
   @Prop()
   observation: string;
+
+  @Prop({ default: null })
+  deleted_at: Date;
 }
 export const ItemSchema = SchemaFactory.createForClass(Item);

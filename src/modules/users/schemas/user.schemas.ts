@@ -12,6 +12,7 @@ export class User {
   @Prop({ default: new mongoose.Types.ObjectId() })
   _id: mongoose.Types.ObjectId;
 
+
   @Prop({ required: true })
   name: string;
 
@@ -32,6 +33,9 @@ export class User {
 
   @Prop({ required: true })
   role: TRole;
+
+  @Prop({ default: null })
+  deleted_at: Date;
 
   constructor(partial?: Partial<User>) {
     Object.assign(this, partial);

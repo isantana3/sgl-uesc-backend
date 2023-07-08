@@ -22,18 +22,6 @@ import { AvailableRoomsDto } from './dto/available-rooms.dto';
 @Controller('reservations')
 export class ReservationsController {
   constructor(private readonly reservationsService: ReservationsService) {}
-  // Criação de reserva
-  // Atualização
-  // Visualização de todas as salas reservadas
-  // - # Por localização (pavilhão)
-  // - # Por sala
-  // - # Por dia, mostrar todas as salas disponíveis naquele dia
-  // - # Por dia e hora, mostrar todas as salas disponíveis naquele horário
-  // - # Admin -> Visualizar reservar por usuário
-  // Visualização de uma reserva
-  // Cancelar reserva
-  // - Só administrador e usuário que reservou pode reservar sala
-  // Verificar se possui reserva de uma sala em uma data específica
 
   @Post()
   @ApiResponse({
@@ -41,28 +29,34 @@ export class ReservationsController {
     description: 'Dado criado com sucesso',
     type: ResponseReservationDto,
   })
-  create(@Body() createReservationDto: CreateReservationDto) {
+  create(@Body() createReservationDto: any) {
     const {
-      endDate,
+      day,
       label,
       laterObservation,
       previousObservation,
       responsible,
       room,
-      startDate,
+      startHour,
+      endHour,
       status,
       semester,
+      startDate,
+      endDate,
     } = createReservationDto;
     return this.reservationsService.create({
-      endDate,
+      day,
       label,
       laterObservation,
       previousObservation,
       responsible,
       room,
-      startDate,
+      startHour,
+      endHour,
       status,
       semester,
+      startDate,
+      endDate,
     });
   }
   @Get('/available-rooms')
@@ -86,6 +80,17 @@ export class ReservationsController {
   findAll(@Query() filterDto: FindReservationFilterDto) {
     return this.reservationsService.findAll(filterDto);
   }
+
+  @Get('/semester')
+  @ApiResponse({
+    status: 200,
+    description: 'Dados listados com sucesso',
+    isArray: true,
+    type: ResponseReservationDto,
+  })
+  findAllSemester(@Query() filterDto: FindReservationFilterDto) {
+    return this.reservationsService.findAllSemester(filterDto);
+  }
   @Get(':id')
   @ApiResponse({
     status: 200,
@@ -103,35 +108,40 @@ export class ReservationsController {
     description: 'Atualização de dado realizada com sucesso',
     type: ResponseReservationDto,
   })
-  update(
-    @Param('id') id: string,
-    @Body() updateReservationDto: UpdateReservationDto,
-  ) {
+  update(@Param('id') id: string, @Body() updateReservationDto: any) {
     const {
-      endDate,
+      day,
       label,
       laterObservation,
       previousObservation,
       responsible,
       room,
-      startDate,
+      startHour,
+      endHour,
       status,
+      semester,
+      startDate,
+      endDate,
     } = updateReservationDto;
     return this.reservationsService.update(id, {
-      endDate,
+      day,
       label,
       laterObservation,
       previousObservation,
       responsible,
       room,
-      startDate,
+      startHour,
+      endHour,
       status,
+      semester,
+      startDate,
+      endDate,
     });
   }
 
   @Delete(':id')
   @ApiResponse({
-    status: 200,
+    status: 204,
     description: 'Deleção de dado realizada com sucesso',
     type: ResponseReservationDto,
   })
