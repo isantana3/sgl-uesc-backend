@@ -106,6 +106,7 @@ export class ReservationsService {
   async checkReservation(checkReservationDto: any): Promise<Reservation[]> {
     const { day, room, startHour, endHour, semester, dayWeek } =
       checkReservationDto;
+    console.log(day, room, startHour, endHour, semester, dayWeek);
 
     if (endHour === startHour) {
       throw new HttpException(
@@ -223,9 +224,10 @@ export class ReservationsService {
     const startTime = startHour + startMinute;
     newReservation.startHour = startTime;
 
-    const day = startDate.toString().split('T')[0];
+    const day = startDate.toISOString().split('T')[0];
 
     const dayNumber = parseInt(day.split('-').join(''));
+
     newReservation.dayWeek = dayWeekItens[startDate.getDay()];
     newReservation.day = dayNumber;
 
