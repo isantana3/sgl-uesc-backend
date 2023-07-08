@@ -66,7 +66,7 @@ export class RoomsController {
 
   @Delete(':id')
   @ApiResponse({
-    status: 200,
+    status: 204,
     description: 'Deleção de dado realizada com sucesso',
     type: ResponseRoomDto,
   })

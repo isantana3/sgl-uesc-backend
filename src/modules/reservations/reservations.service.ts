@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, mongo } from 'mongoose';
 import { UsersService } from 'src/modules/users/users.service';
@@ -81,15 +81,9 @@ export class ReservationsService {
         },
         status: 'reserved',
       },
-      // {
-      //   room,
-      //   'semester.endDate': {
-      //     $gt: startDate,
-      //     $lte: endDate,
-      //   },
-      //   status: 'reserved',
-      // },
-    ]);
+
+      deleted_at: null,
+    });
 
     return reservations;
   }
@@ -130,6 +124,7 @@ export class ReservationsService {
 
     return await this.reservationModel.create(createReservationDto);
   }
+
 
   async findAll(filterDto?: FindReservationFilterDto): Promise<any> {
     const query = this.reservationModel.find();
@@ -186,6 +181,7 @@ export class ReservationsService {
       (reservation) => reservation.room && reservation.room.pavilion,
     );
 
+
     if (reservations.length == 0 && currentPage != 1) {
       throw new HttpException(
         {
@@ -218,8 +214,9 @@ export class ReservationsService {
 
   async findOne(id: string): Promise<Reservation> {
     const result = await this.reservationModel
-      .findOne({ _id: id })
-      .populate('responsible').populate({
+      .findOne({ _id: id, deleted_at: null })
+      .populate('responsible')
+      .populate({
         path: 'room',
         populate: {
           path: 'pavilion',
@@ -228,13 +225,7 @@ export class ReservationsService {
       })
       .exec();
     if (!result) {
-      throw new HttpException(
-        {
-          status: HttpStatus.BAD_REQUEST,
-          error: 'Reservation Not Found',
-        },
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new NotFoundException('Revation Not Found');
     }
     // Remover o campo "password" de "responsible"
     const sanitizedResult = result.toJSON();
@@ -247,17 +238,27 @@ export class ReservationsService {
     id: string,
     updateReservationDto: UpdateReservationDto,
   ): Promise<Reservation> {
-    await this.reservationModel
-      .updateOne({ _id: id }, updateReservationDto)
-      .exec();
+    const existingItem = await this.reservationModel.findOne({ _id: id, deleted_at: null }).exec();
+  
+    if (!existingItem) {
+      throw new NotFoundException('Item Not Found');
+    }
+  
+    existingItem.set(updateReservationDto);
+    await existingItem.save();
 
     return this.findOne(id);
   }
 
   async remove(id: string): Promise<Reservation> {
     const deletedItem = await this.reservationModel
-      .findByIdAndRemove({ _id: id })
+      .findOneAndUpdate({ _id: id, deleted_at: null }, { deleted_at: new Date() })
       .exec();
+  
+    if (!deletedItem) {
+      throw new NotFoundException('Item Not Found');
+    }
+  
     return deletedItem;
   }
 }

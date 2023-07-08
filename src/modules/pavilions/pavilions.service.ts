@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
 import { CreatePavilionDto } from './dto/create-pavilion.dto';
 import { UpdatePavilionDto } from './dto/update-pavilion.dto';
 import { InjectModel } from '@nestjs/mongoose';
@@ -21,19 +21,13 @@ export class PavilionsService {
     let currentPage = Number(query.page)|| 1;
     let skip = limitPage * (currentPage-1);
 
-    const all_pavilions = await this.pavilionModel.find().exec();
+    const all_pavilions = await this.pavilionModel.find({ deleted_at: null }).exec();
     const lastPage = Math.ceil(all_pavilions.length / limitPage);
 
-    const pavilions = await this.pavilionModel.find().limit(limitPage).skip(skip).exec();
+    const pavilions = await this.pavilionModel.find({ deleted_at: null }).limit(limitPage).skip(skip).exec();
 
     if (pavilions.length == 0 && currentPage != 1){
-      throw new HttpException(
-        {
-          status: HttpStatus.NOT_FOUND,
-          error: 'Page Not Found',
-        },
-        HttpStatus.NOT_FOUND,
-      );
+       throw new NotFoundException('Page Not Found');
     }
 
     interface CustomResponse {
@@ -57,32 +51,35 @@ export class PavilionsService {
   }
 
   async findOne(id: string): Promise<Pavilion> {
-    const result = await this.pavilionModel.findOne({ _id: id }).exec();
+    const result = await this.pavilionModel.findOne({ _id: id, deleted_at: null }).exec();
     if (!result) {
-      throw new HttpException(
-        {
-          status: HttpStatus.BAD_REQUEST,
-          error: 'Pavilion Not Found',
-        },
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new NotFoundException('Pavilion Not Found');
     }
     return result;
   }
 
-  async update(
-    id: string,
-    updatePavilionDto: UpdatePavilionDto,
-  ): Promise<Pavilion> {
-    await this.pavilionModel.updateOne({ _id: id }, updatePavilionDto).exec();
-
-    return this.findOne(id);
+  async update(id: string, updatePavilionDto: UpdatePavilionDto,): Promise<Pavilion> {
+    const existingPavilion = await this.pavilionModel.findOne({ _id: id, deleted_at: null }).exec();
+  
+    if (!existingPavilion) {
+      throw new NotFoundException('Pavilion Not Found');
+    }
+  
+    existingPavilion.set(updatePavilionDto);
+    await existingPavilion.save();
+  
+    return existingPavilion;
   }
 
   async remove(id: string): Promise<Pavilion> {
     const deletedItem = await this.pavilionModel
-      .findByIdAndRemove({ _id: id })
+      .findOneAndUpdate({ _id: id, deleted_at: null }, { deleted_at: new Date() })
       .exec();
+  
+    if (!deletedItem) {
+      throw new NotFoundException('Pavilion Not Found');
+    }
+  
     return deletedItem;
   }
 }

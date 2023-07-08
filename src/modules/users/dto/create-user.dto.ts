@@ -56,5 +56,6 @@ export class CreateUserDto {
   @IsEnum(['admin', 'manager', 'user'])
   role?: TRole;
 
+
   isActive?: boolean;
 }

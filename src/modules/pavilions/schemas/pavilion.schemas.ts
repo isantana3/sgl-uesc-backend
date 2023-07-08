@@ -13,6 +13,9 @@ export class Pavilion {
   @Prop()
   observation: string;
 
+  @Prop({ default: null })
+  deleted_at: Date;
+
   constructor(partial?: Partial<Pavilion>) {
     Object.assign(this, partial);
   }
