@@ -1,6 +1,8 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import mongoose, { HydratedDocument } from 'mongoose';
-import { User } from 'src/modules/users/schemas/user.schemas';
+
+// Precisou ser alterado pois estava dendo erro nos testes
+import { User } from '../../users/schemas/user.schemas';
 
 export type TokenDocument = HydratedDocument<Token>;
 @Schema({ timestamps: true })

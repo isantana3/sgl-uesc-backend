@@ -1,7 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Expose } from 'class-transformer';
 import mongoose, { HydratedDocument } from 'mongoose';
-import { Pavilion } from 'src/modules/pavilions/schemas/pavilion.schemas';
+import { Pavilion } from '../../pavilions/schemas/pavilion.schemas';
 
 export type RoomDocument = HydratedDocument<Room>;
 

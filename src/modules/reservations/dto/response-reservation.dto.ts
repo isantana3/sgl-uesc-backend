@@ -19,4 +19,9 @@ export class ResponseReservationDto extends CreateReservationDto {
     description: 'Data de atualização do dado',
   })
   updatedAt: Date;
+  
+  constructor(partial?: Partial<ResponseReservationDto>) {
+    super();
+    Object.assign(this, partial);
+  }
 }

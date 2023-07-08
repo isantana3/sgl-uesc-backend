@@ -1,7 +1,7 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, mongo } from 'mongoose';
-import { UsersService } from 'src/modules/users/users.service';
+import { UsersService } from '../users/users.service';
 import { RoomsService } from '../rooms/rooms.service';
 import { Room } from '../rooms/schemas/room.schemas';
 import { AvailableRoomsDto } from './dto/available-rooms.dto';

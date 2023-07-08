@@ -1,7 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import mongoose, { HydratedDocument } from 'mongoose';
-import { Room } from 'src/modules/rooms/schemas/room.schemas';
-import { User } from 'src/modules/users/schemas/user.schemas';
+import { Room } from '../../rooms/schemas/room.schemas';
+import { User } from '../../users/schemas/user.schemas';
 
 export type ReservationDocument = HydratedDocument<Reservation>;
 export type TStatus = 'reserved' | 'cancelled' | 'finished';

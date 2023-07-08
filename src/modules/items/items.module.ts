@@ -3,7 +3,7 @@ import { ItemsService } from './items.service';
 import { ItemsController } from './items.controller';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Item, ItemSchema } from './schemas/item.schemas';
-import { RoomsModule } from 'src/modules/rooms/rooms.module';
+import { RoomsModule } from '../rooms/rooms.module';
 
 @Module({
   imports: [

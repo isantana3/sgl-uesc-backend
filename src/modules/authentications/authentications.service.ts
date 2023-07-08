@@ -15,7 +15,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Token } from './schemas/tokens.entity';
 import mongoose, { Model } from 'mongoose';
 import { User } from '../users/schemas/user.schemas';
-import time from 'src/utils/time';
+import time from '../../utils/time';
 @Injectable()
 export class AuthenticationsService {
   constructor(

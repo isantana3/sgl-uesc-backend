@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import mongoose, { HydratedDocument } from 'mongoose';
-import { Room } from 'src/modules/rooms/schemas/room.schemas';
+import { Room } from '../../rooms/schemas/room.schemas';
 
 export type ItemDocument = HydratedDocument<Item>;
 @Schema({ timestamps: true })
