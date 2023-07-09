@@ -163,11 +163,11 @@ export class UsersService {
     return this.findOne(id);
   }
 
-  async remove(id: string): Promise<User> {
+  async remove(id: string): Promise<any> {
     const _id = new mongoose.Types.ObjectId(id);
-    console.log(_id);
-    const deletedItem = await this.userModel.findByIdAndRemove({ _id }).exec();
-    console.log(deletedItem);
+
+    const deletedItem = await this.userModel.deleteOne({ _id }).exec();
+
     return deletedItem;
   }
 }
