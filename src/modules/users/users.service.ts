@@ -165,7 +165,9 @@ export class UsersService {
 
   async remove(id: string): Promise<User> {
     const _id = new mongoose.Types.ObjectId(id);
+    console.log(_id);
     const deletedItem = await this.userModel.findByIdAndRemove({ _id }).exec();
+    console.log(deletedItem);
     return deletedItem;
   }
 }
