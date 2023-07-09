@@ -89,13 +89,6 @@ export class UsersService {
 
     const lastPage = Math.ceil(all_users.length / limitPage);
 
-    const users = await this.userModel
-      .find()
-      .limit(limitPage)
-      .skip(skip)
-      .exec();
-
-
     const users = await this.userModel.find({ deleted_at: null }).limit(limitPage).skip(skip).exec();
 
     
