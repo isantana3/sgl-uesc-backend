@@ -468,9 +468,32 @@ export class ReservationsService {
     if (sanitizedResult.responsible) {
       delete sanitizedResult.responsible.password;
     }
-    return sanitizedResult;
+
+    return convertReservation(sanitizedResult);
   }
   async update(id: string, updateReservationDto: any): Promise<Reservation> {
+    const newReservation = new Reservation();
+    if (updateReservationDto.endDate) {
+      const endDate = new Date(updateReservationDto.endDate);
+      const endHour = endDate.getUTCHours() * 100;
+      const endMinute = endDate.getUTCMinutes();
+      const endTime = endHour + endMinute;
+      newReservation.endHour = endTime;
+    }
+    if (updateReservationDto.startDate) {
+      const startDate = new Date(updateReservationDto.startDate);
+      const startHour = startDate.getUTCHours() * 100;
+      const startMinute = startDate.getUTCMinutes();
+      const startTime = startHour + startMinute;
+      newReservation.startHour = startTime;
+      const day = startDate.toISOString().split('T')[0];
+      const dayNumber = parseInt(day.split('-').join(''));
+      newReservation.dayWeek = dayWeekItens[startDate.getDay()];
+      newReservation.day = dayNumber;
+    }
+
+    Object.assign(updateReservationDto, newReservation);
+
     await this.reservationModel
       .updateOne({ _id: new mongo.ObjectId(id) }, updateReservationDto)
       .exec();
