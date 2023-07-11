@@ -240,6 +240,14 @@ export class ReservationsService {
       laterObservation: createReservationDto.laterObservation,
       semester: createReservationDto.semester,
     });
+    console.log({
+      day: dayNumber,
+      startHour: startTime,
+      endHour: endTime,
+      room: createReservationDto.room,
+      semester: createReservationDto.semester,
+      dayWeek: newReservation.dayWeek,
+    });
 
     const reservations = await this.checkReservation({
       day: dayNumber,
@@ -249,6 +257,7 @@ export class ReservationsService {
       semester: createReservationDto.semester,
       dayWeek: newReservation.dayWeek,
     });
+    console.log(reservations);
 
     if (reservations.length > 0) {
       throw new HttpException(
