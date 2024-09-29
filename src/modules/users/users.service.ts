@@ -55,24 +55,25 @@ export class UsersService {
       );
     }
 
-    const token = await this.authService.createToken({
-      user: newUser,
-      type: 'email-verification',
-    });
+    // NOTE: Moved to AuthenticationsService
+    // const token = await this.authService.createToken({
+    //   user: newUser,
+    //   type: 'email-verification',
+    // });
 
-    await this.mail.sendMail({
-      options: {
-        from: `"SGL UESC" <contato@uescsgl.site>`,
-        to: createUserDto.email,
-        subject: 'Confirmação de E-mail',
-      },
-      template: {
-        path: 'email-verification',
-        params: {
-          url: `${process.env.URL_EMAIL_CONFIRMATION}?token=${token}`,
-        },
-      },
-    });
+    // await this.mail.sendMail({
+    //   options: {
+    //     from: `"SGL UESC" <contato@uescsgl.site>`,
+    //     to: createUserDto.email,
+    //     subject: 'Confirmação de E-mail',
+    //   },
+    //   template: {
+    //     path: 'email-verification',
+    //     params: {
+    //       url: `${process.env.URL_EMAIL_CONFIRMATION}?token=${token}`,
+    //     },
+    //   },
+    // });
     return newUser;
   }
 
