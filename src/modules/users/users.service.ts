@@ -62,6 +62,7 @@ export class UsersService {
 
     await this.mail.sendMail({
       options: {
+        from: `"SGL UESC" <contato@uescsgl.site>`,
         to: createUserDto.email,
         subject: 'Confirmação de E-mail',
       },

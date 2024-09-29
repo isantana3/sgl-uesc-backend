@@ -115,6 +115,7 @@ export class AuthenticationsService {
 
     await this.mail.sendMail({
       options: {
+        from: `"SGL UESC" <contato@uescsgl.site>`,
         to: signUpDto.email,
         subject: 'Confirmação de E-mail',
       },
@@ -239,6 +240,7 @@ export class AuthenticationsService {
     const token = await this.createToken({ user, type: 'reset-password' });
     await this.mail.sendMail({
       options: {
+        from: `"SGL UESC" <contato@uescsgl.site>`,
         to: user.email,
         subject: 'Recuperação de senha',
       },
