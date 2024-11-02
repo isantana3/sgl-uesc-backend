@@ -130,19 +130,34 @@ export class AuthenticationsService {
   }
 
   async login({ email, password }: LoginUserDto) {
-    const user = await this.usersService.findByEmail(email);
-
-    if (!user.isActive) {
+    let user;
+    
+    // Tenta buscar o usuário pelo email
+    try {
+      user = await this.usersService.findByEmail(email);
+    } catch (error) {
       throw new HttpException(
         {
           status: HttpStatus.BAD_REQUEST,
-          error: 'Email or password mismatch 1',
+          error: 'Email or password mismatch',
         },
         HttpStatus.BAD_REQUEST,
       );
     }
+  
+    // Verifica se o usuário está ativo
+    if (!user.isActive) {
+      throw new HttpException(
+        {
+          status: HttpStatus.BAD_REQUEST,
+          error: 'Email or password mismatch',
+        },
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+  
+    // Verifica se a senha está correta
     const passwordMatched = await compare(password, user.password);
-
     if (!passwordMatched) {
       throw new HttpException(
         {
@@ -152,6 +167,8 @@ export class AuthenticationsService {
         HttpStatus.BAD_REQUEST,
       );
     }
+  
+    // Gera o token de autenticação
     const payload = { sub: user._id.toString(), username: user.name };
     user.password = undefined;
     return {
@@ -159,6 +176,7 @@ export class AuthenticationsService {
       user,
     };
   }
+  
 
   async activeAccount({
     token,
