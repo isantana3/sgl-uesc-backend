@@ -235,7 +235,7 @@ export class ReservationsService {
       room: createReservationDto.room,
       responsible: createReservationDto.responsible,
       label: createReservationDto.label,
-      status: createReservationDto.status,
+      status: 'reserved', // Define explicitamente o status como "reserved", independente do que for recebido na request
       previousObservation: createReservationDto.previousObservation,
       laterObservation: createReservationDto.laterObservation,
       semester: createReservationDto.semester,
