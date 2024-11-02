@@ -1,10 +1,11 @@
-import { Body, Controller, Get, Param, Patch, Post } from '@nestjs/common';
+import { Body, Controller, Get, Req, Res, Param, Patch, Post, HttpCode } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { AuthenticationsService } from './authentications.service';
 import { SignUpUserDto } from './dto/sign-up-user.dto';
 import { ActiveAccountDto } from './dto/active-account.dto';
 import { LoginUserDto } from './dto/login-user.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
+import { Request, Response } from 'express';
 
 @ApiTags('Autenticação - Authentications')
 @Controller('authentications')
@@ -23,6 +24,7 @@ export class AuthenticationsController {
       registration,
     });
   }
+
   @Post('login')
   login(@Body() loginUserDto: LoginUserDto) {
     const { email, password } = loginUserDto;
@@ -31,6 +33,19 @@ export class AuthenticationsController {
       password,
     });
   }
+
+  @Get('csrf-token')
+  getCsrfToken(@Req() req: Request, @Res() res: Response) {
+    try {
+      // @ts-ignore
+      const csrfToken = req.csrfToken();
+      res.cookie('XSRF-TOKEN', csrfToken, { httpOnly: true, sameSite: 'strict' });
+      res.json({ csrfToken });
+    } catch (error) {
+      res.status(500).json({ message: 'CSRF token generation failed', error });
+    }
+  }
+  
   @Post('active-account')
   activeAccount(@Body() data: ActiveAccountDto) {
     const { token, password } = data;
@@ -39,6 +54,7 @@ export class AuthenticationsController {
       password,
     });
   }
+
   @Post('forgot-password')
   forgotPassword(@Body() data: ForgotPasswordDto) {
     const { email } = data;
