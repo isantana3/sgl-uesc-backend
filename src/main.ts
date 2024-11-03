@@ -12,7 +12,7 @@ async function bootstrap() {
   // Configurações de CORS
   app.enableCors({
     origin: process.env.CORS_ORIGIN || '*', // restrinja em produção
-    allowedHeaders: ['Content-Type', 'Authorization', 'XSRF-TOKEN', 'Access-Control-Allow-Origin'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'Xsrf-Token', 'Access-Control-Allow-Origin'],
     methods: ['GET', 'HEAD', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'], // Adicione OPTIONS aqui
     credentials: true,
   });
@@ -32,8 +32,12 @@ async function bootstrap() {
 
   // Middleware de segurança
   app.use(cookieParser()); // Necessário para `csurf`
-  app.use(csurf({ cookie: true })); // Configura CSRF com cookies
-
+  app.use(csurf({ 
+    cookie: true,
+    value: (req) => {
+      return req.headers['xsrf-token'] || req.cookies['XSRF-TOKEN']; // Agora aceitando o cabeçalho em camel case
+    }
+  }));
   // Pipes globais e interceptors
   app.useGlobalPipes(new ValidationPipe());
   app.useGlobalInterceptors(new TransformInterceptor());
