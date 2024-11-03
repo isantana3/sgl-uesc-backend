@@ -12,7 +12,7 @@ async function bootstrap() {
   // Configurações de CORS
   app.enableCors({
     origin: process.env.CORS_ORIGIN || '*', // restrinja em produção
-    allowedHeaders: ['Content-Type', 'Authorization', 'XSRF-TOKEN'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'XSRF-TOKEN', 'Access-Control-Allow-Origin'],
     methods: ['GET', 'HEAD', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'], // Adicione OPTIONS aqui
     credentials: true,
   });
