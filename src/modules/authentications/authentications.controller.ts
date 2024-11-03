@@ -39,7 +39,7 @@ export class AuthenticationsController {
     try {
       // @ts-ignore
       const csrfToken = req.csrfToken();
-      res.cookie('XSRF-TOKEN', csrfToken, { sameSite: 'strict' });
+      res.cookie('Xsrf-Token', csrfToken, { sameSite: 'strict' });
       res.json({ csrfToken });
     } catch (error) {
       res.status(500).json({ message: 'CSRF token generation failed', error });
