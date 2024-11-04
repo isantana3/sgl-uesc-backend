@@ -1,5 +1,5 @@
 import * as csurf from 'csurf';
-import * as cookieParser from 'cookie-parser'; // necessário para o CSRF com cookies
+import * as cookieParser from 'cookie-parser';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
@@ -8,12 +8,12 @@ import { TransformInterceptor } from './interceptors/transform.interceptor';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  
+
   // Configurações de CORS
   app.enableCors({
-    origin: process.env.CORS_ORIGIN || '*', // restrinja em produção
+    origin: process.env.CORS_ORIGIN || '*',
     allowedHeaders: ['Content-Type', 'Authorization', 'Xsrf-Token', 'Access-Control-Allow-Origin'],
-    methods: ['GET', 'HEAD', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'], // Adicione OPTIONS aqui
+    methods: ['GET', 'HEAD', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     credentials: true,
   });
 
@@ -31,13 +31,16 @@ async function bootstrap() {
   SwaggerModule.setup(`${globalPrefix}/docs`, app, document);
 
   // Middleware de segurança
-  app.use(cookieParser()); // Necessário para `csurf`
-  app.use(csurf({ 
-    cookie: true,
-    value: (req) => {
-      return req.headers['xsrf-token'] || req.cookies['XSRF-TOKEN']; // Agora aceitando o cabeçalho em camel case
-    }
+  app.use(cookieParser());
+  app.use(csurf({
+    cookie: {
+      httpOnly: true, // Protege o cookie contra acessos por JavaScript no frontend
+      sameSite: 'strict',
+      secure: process.env.NODE_ENV === 'production' // Somente em HTTPS em produção
+    },
+    value: (req) => req.headers['xsrf-token'] || req.cookies['XSRF-TOKEN'],
   }));
+
   // Pipes globais e interceptors
   app.useGlobalPipes(new ValidationPipe());
   app.useGlobalInterceptors(new TransformInterceptor());
