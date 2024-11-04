@@ -12,7 +12,7 @@ async function bootstrap() {
   // Configurações de CORS
   app.enableCors({
     origin: process.env.CORS_ORIGIN || '*',
-    allowedHeaders: ['Content-Type', 'Authorization', 'Xsrf-Token', 'Cookie', 'Access-Control-Allow-Origin'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'Xsrf-Token', 'Access-Control-Allow-Origin'],
     methods: ['GET', 'HEAD', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     credentials: true,
   });
@@ -32,15 +32,17 @@ async function bootstrap() {
 
   // Middleware de segurança
   app.use(cookieParser());
-  app.use(csurf({
-    cookie: {
-      httpOnly: true, // Protege o cookie contra acessos por JavaScript no frontend
-      sameSite: 'strict',
-      secure: process.env.NODE_ENV === 'production' // Somente em HTTPS em produção
-    },
-    value: (req) => req.headers['xsrf-token'] || req.cookies['XSRF-TOKEN'],
-  }));
-
+  app.use(
+    csurf({
+      cookie: {
+        httpOnly: true, // Protege o cookie contra acessos por JavaScript no frontend
+        sameSite: 'strict',
+        secure: process.env.NODE_ENV === 'production', // Somente em HTTPS em produção
+      },
+      value: (req) => req.headers['xsrf-token'] || req.cookies['XSRF-TOKEN'],
+      ignoreMethods: ['GET', 'HEAD', 'OPTIONS'], // Ignora requisições OPTIONS
+    })
+  );
   // Pipes globais e interceptors
   app.useGlobalPipes(new ValidationPipe());
   app.useGlobalInterceptors(new TransformInterceptor());
