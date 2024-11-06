@@ -36,7 +36,7 @@ async function bootstrap() {
     csurf({
       cookie: {
         httpOnly: true, // Protege o cookie contra acessos por JavaScript no frontend
-        // sameSite: 'strict',
+        sameSite: 'strict',
         secure: process.env.NODE_ENV === 'production', // Somente em HTTPS em produção
       },
       value: (req) => req.headers['Xsrf-Token'],
