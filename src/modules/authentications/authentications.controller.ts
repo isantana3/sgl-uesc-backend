@@ -34,18 +34,6 @@ export class AuthenticationsController {
     });
   }
 
-  @Get('csrf-token')
-  getCsrfToken(@Req() req: Request, @Res() res: Response) {
-    try {
-      // @ts-ignore
-      const csrfToken = req.csrfToken();
-      res.cookie('Xsrf-Token', csrfToken, { sameSite: 'strict' });
-      res.json({ csrfToken });
-    } catch (error) {
-      res.status(500).json({ message: 'CSRF token generation failed', error });
-    }
-  }
-  
   @Post('active-account')
   activeAccount(@Body() data: ActiveAccountDto) {
     const { token, password } = data;
