@@ -11,6 +11,14 @@ async function bootstrap() {
 
   app.enableCors({
     origin: process.env.CORS_ORIGIN || '*',
+    // origin: (origin, callback) => {
+    //   // Permitir somente a origem que é necessária
+    //   if (origin === 'https://www.uescsgl.site') {
+    //     callback(null, true);
+    //   } else {
+    //     callback(new Error('Not allowed by CORS'));
+    //   }
+    // },
     allowedHeaders: ['Content-Type', 'Authorization', 'Xsrf-Token', 'Cookie', 'Access-Control-Allow-Origin'],
     methods: ['GET', 'HEAD', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     credentials: true,
@@ -37,6 +45,7 @@ async function bootstrap() {
 
     // If no token in cookie, generate one and set it in a secure, HTTP-only cookie
     if (!csrfToken) {
+      console.log('Generating CSRF token');
       const token = generateCsrfToken(); // function to generate a unique token
       res.cookie('XSRF-TOKEN', token, {
         httpOnly: false,
@@ -53,8 +62,11 @@ async function bootstrap() {
       const csrfTokenHeader = req.headers['X-Csrf-Token'] as string;
       const csrfTokenCookie = req.cookies['XSRF-TOKEN'];
 
+      console.log('CSRF token from header:', csrfTokenHeader);
+      console.log('CSRF token from cookie:', csrfTokenCookie);
       // Check if the token from the header matches the token in the cookie
       if (csrfTokenHeader !== csrfTokenCookie) {
+        console.log('Invalid CSRF token');
         return res.status(403).json({ message: 'Invalid CSRF token' });
       }
     }
