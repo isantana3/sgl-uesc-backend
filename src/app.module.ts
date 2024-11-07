@@ -1,6 +1,7 @@
 import { Module, NestModule, MiddlewareConsumer } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
+import { APP_GUARD } from '@nestjs/core';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthenticationsModule } from './modules/authentications/authentications.module';
@@ -11,6 +12,7 @@ import { RoomsModule } from './modules/rooms/rooms.module';
 import { UsersModule } from './modules/users/users.module';
 import { MailModule } from './modules/mail/mail.module';
 import { LoggingMiddleware } from './utils/logging.middleware';
+import { JwtAuthGuard } from './modules/authentications/jwt-auth.guard'; // Importa JwtAuthGuard
 
 @Module({
   imports: [
@@ -25,13 +27,16 @@ import { LoggingMiddleware } from './utils/logging.middleware';
     MailModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    {
+      provide: APP_GUARD,
+      useClass: JwtAuthGuard, // Configura JwtAuthGuard como um guard global
+    },
+  ],
 })
-// export class AppModule {}
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer
-      .apply(LoggingMiddleware)
-      .forRoutes('*'); // Aplica o middleware para todas as rotas
+    consumer.apply(LoggingMiddleware).forRoutes('*'); // Aplica o middleware para todas as rotas
   }
 }
