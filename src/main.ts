@@ -19,7 +19,7 @@ async function bootstrap() {
     //     callback(new Error('Not allowed by CORS'));
     //   }
     // },
-    allowedHeaders: ['Content-Type', 'Authorization', 'Xsrf-Token', 'Cookie', 'Access-Control-Allow-Origin'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Csrf-Token', 'Access-Control-Allow-Origin'],
     methods: ['GET', 'HEAD', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     credentials: true,
   });
