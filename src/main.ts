@@ -5,6 +5,7 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { ValidationPipe } from '@nestjs/common';
 import { TransformInterceptor } from './interceptors/transform.interceptor';
 import { Request, Response, NextFunction } from 'express';
+import { JwtAuthGuard } from './modules/authentications/jwt-auth.guard';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -76,7 +77,9 @@ async function bootstrap() {
   // Pipes globais e interceptors
   app.useGlobalPipes(new ValidationPipe());
   app.useGlobalInterceptors(new TransformInterceptor());
-
+   
+  // Aplicando JwtAuthGuard globalmente
+   app.useGlobalGuards(new JwtAuthGuard());
   await app.listen(3333);
 }
 
