@@ -1,7 +1,6 @@
 import { Module, NestModule, MiddlewareConsumer } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
-import { APP_GUARD } from '@nestjs/core';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthenticationsModule } from './modules/authentications/authentications.module';
@@ -12,7 +11,7 @@ import { RoomsModule } from './modules/rooms/rooms.module';
 import { UsersModule } from './modules/users/users.module';
 import { MailModule } from './modules/mail/mail.module';
 import { LoggingMiddleware } from './utils/logging.middleware';
-import { JwtAuthGuard } from './modules/authentications/jwt-auth.guard'; // Importa JwtAuthGuard
+import { JwtAuthMiddleware } from './modules/authentications/jwt-auth.middleware';
 
 @Module({
   imports: [
@@ -27,16 +26,23 @@ import { JwtAuthGuard } from './modules/authentications/jwt-auth.guard'; // Impo
     MailModule,
   ],
   controllers: [AppController],
-  providers: [
-    AppService,
-    {
-      provide: APP_GUARD,
-      useClass: JwtAuthGuard, // Configura JwtAuthGuard como um guard global
-    },
-  ],
+  providers: [AppService],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(LoggingMiddleware).forRoutes('*'); // Aplica o middleware para todas as rotas
+    consumer
+      .apply(LoggingMiddleware)
+      .forRoutes('*'); // Aplica o middleware para todas as rotas
+
+    consumer
+      .apply(JwtAuthMiddleware)
+      .exclude( // Exclui as rotas públicas da verificação do JWT
+        'authentications/login',
+        'authentications/reset-password',
+        'authentications/forgot-password',
+        'authentications/forgot-password/:token',
+        'authentications/active-account',
+      )
+      .forRoutes('*'); // Aplica o middleware para todas as rotas, mas exclui as definidas acima
   }
 }
