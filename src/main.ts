@@ -59,6 +59,11 @@ async function bootstrap() {
 
   // Middleware to validate CSRF token
   app.use((req: Request, res: Response, next: NextFunction) => {
+    // Excluindo a verificação de CSRF para a rota de login
+    if (req.path === '/authentications/login') {
+      return next(); // Pula a validação de CSRF para o login
+    }
+
     if (['POST', 'PUT', 'DELETE'].includes(req.method)) {
       const csrfTokenHeader = req.headers['X-Csrf-Token'] as string;
       const csrfTokenCookie = req.cookies['XSRF-TOKEN'];
@@ -79,7 +84,7 @@ async function bootstrap() {
   app.useGlobalInterceptors(new TransformInterceptor());
    
   // Aplicando JwtAuthGuard globalmente
-   app.useGlobalGuards(new JwtAuthGuard());
+  //  app.useGlobalGuards(new JwtAuthGuard());
   await app.listen(3333);
 }
 

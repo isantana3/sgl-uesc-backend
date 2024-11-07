@@ -37,11 +37,11 @@ export class AppModule implements NestModule {
     consumer
       .apply(JwtAuthMiddleware)
       .exclude( // Exclui as rotas públicas da verificação do JWT
-        'authentications/login',
-        'authentications/reset-password',
-        'authentications/forgot-password',
-        'authentications/forgot-password/:token',
-        'authentications/active-account',
+        'authentications/login', 
+        'authentications/reset-password', 
+        'authentications/forgot-password', 
+        'authentications/forgot-password/:token', 
+        'authentications/active-account', 
       )
       .forRoutes('*'); // Aplica o middleware para todas as rotas, mas exclui as definidas acima
   }

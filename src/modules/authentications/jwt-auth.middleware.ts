@@ -7,6 +7,8 @@ export class JwtAuthMiddleware implements NestMiddleware {
   constructor(private readonly jwtService: JwtService) {}
 
   use(req: Request, res: Response, next: NextFunction) {
+    console.log('Middleware de JWT chamado'); // Log para depuração
+
     try {
       const token = req.headers['authorization']?.split(' ')[1]; // Obtém o token do cabeçalho
 
